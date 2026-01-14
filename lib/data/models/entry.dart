@@ -17,7 +17,11 @@ class Entry {
 
   String? dreamAssociations; // For dreams
 
-  int? emotionIntensity; // 1-5, for emotions
+  int? dailyMood; // 1-5 scale, replacing simple emotionIntensity
+
+  String? wakeUpMood; // For dreams
+
+  List<String>? dreamTags; // For dreams
 
   late DateTime timestamp;
 }

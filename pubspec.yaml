@@ -38,6 +38,7 @@ dependencies:
   flutter_animate: ^4.2.0
   path_provider: ^2.1.1
   flutter_heatmap_calendar: ^1.0.5
+  google_fonts: ^7.0.2
 
 dev_dependencies:
   flutter_test:

@@ -42,21 +42,26 @@ class JournalProvider extends ChangeNotifier {
     final Map<DateTime, int> heatmap = {};
 
     entriesByDate.forEach((date, dayEntries) {
+      // Logic for new Heatmap:
+      // Level 1: Just Insight
+      // Level 2: Dream recorded
+      // Level 3: Mood registered (average mood > 0)
+      // Level 4: Dream + Mood
+
       bool hasDream = dayEntries.any((e) => e.type == EntryType.dream);
-      bool hasEmotion = dayEntries.any((e) => e.type == EntryType.emotion);
-      bool hasCriticalEmotion = dayEntries.any(
-        (e) => e.type == EntryType.emotion && (e.emotionIntensity ?? 0) >= 4,
-      );
+      // We can take the average daily mood if multiple exists, or max.
+      // Let's check if any entry has a mood.
+      bool hasMood = dayEntries.any((e) => e.dailyMood != null);
 
       int level = 0;
 
-      if (hasCriticalEmotion || (hasDream && hasEmotion)) {
+      if (hasDream && hasMood) {
         level = 4;
-      } else if (hasEmotion) {
+      } else if (hasMood) {
         level = 3;
       } else if (hasDream) {
         level = 2;
-      } else {
+      } else if (dayEntries.isNotEmpty) {
         level = 1;
       }
 

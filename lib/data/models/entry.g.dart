@@ -22,36 +22,46 @@ const EntrySchema = CollectionSchema(
       name: r'content',
       type: IsarType.string,
     ),
-    r'dreamAssociations': PropertySchema(
+    r'dailyMood': PropertySchema(
       id: 1,
+      name: r'dailyMood',
+      type: IsarType.long,
+    ),
+    r'dreamAssociations': PropertySchema(
+      id: 2,
       name: r'dreamAssociations',
       type: IsarType.string,
     ),
     r'dreamFeelings': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'dreamFeelings',
       type: IsarType.string,
     ),
-    r'emotionIntensity': PropertySchema(
-      id: 3,
-      name: r'emotionIntensity',
-      type: IsarType.long,
+    r'dreamTags': PropertySchema(
+      id: 4,
+      name: r'dreamTags',
+      type: IsarType.stringList,
     ),
     r'timestamp': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'type',
       type: IsarType.byte,
       enumMap: _EntrytypeEnumValueMap,
+    ),
+    r'wakeUpMood': PropertySchema(
+      id: 8,
+      name: r'wakeUpMood',
+      type: IsarType.string,
     )
   },
   estimateSize: _entryEstimateSize,
@@ -88,7 +98,25 @@ int _entryEstimateSize(
     }
   }
   {
+    final list = object.dreamTags;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
+    }
+  }
+  {
     final value = object.title;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.wakeUpMood;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -103,12 +131,14 @@ void _entrySerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.content);
-  writer.writeString(offsets[1], object.dreamAssociations);
-  writer.writeString(offsets[2], object.dreamFeelings);
-  writer.writeLong(offsets[3], object.emotionIntensity);
-  writer.writeDateTime(offsets[4], object.timestamp);
-  writer.writeString(offsets[5], object.title);
-  writer.writeByte(offsets[6], object.type.index);
+  writer.writeLong(offsets[1], object.dailyMood);
+  writer.writeString(offsets[2], object.dreamAssociations);
+  writer.writeString(offsets[3], object.dreamFeelings);
+  writer.writeStringList(offsets[4], object.dreamTags);
+  writer.writeDateTime(offsets[5], object.timestamp);
+  writer.writeString(offsets[6], object.title);
+  writer.writeByte(offsets[7], object.type.index);
+  writer.writeString(offsets[8], object.wakeUpMood);
 }
 
 Entry _entryDeserialize(
@@ -119,14 +149,16 @@ Entry _entryDeserialize(
 ) {
   final object = Entry();
   object.content = reader.readString(offsets[0]);
-  object.dreamAssociations = reader.readStringOrNull(offsets[1]);
-  object.dreamFeelings = reader.readStringOrNull(offsets[2]);
-  object.emotionIntensity = reader.readLongOrNull(offsets[3]);
+  object.dailyMood = reader.readLongOrNull(offsets[1]);
+  object.dreamAssociations = reader.readStringOrNull(offsets[2]);
+  object.dreamFeelings = reader.readStringOrNull(offsets[3]);
+  object.dreamTags = reader.readStringList(offsets[4]);
   object.id = id;
-  object.timestamp = reader.readDateTime(offsets[4]);
-  object.title = reader.readStringOrNull(offsets[5]);
-  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+  object.timestamp = reader.readDateTime(offsets[5]);
+  object.title = reader.readStringOrNull(offsets[6]);
+  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
       EntryType.dream;
+  object.wakeUpMood = reader.readStringOrNull(offsets[8]);
   return object;
 }
 
@@ -140,18 +172,22 @@ P _entryDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 2:
       return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
-    case 4:
-      return (reader.readDateTime(offset)) as P;
-    case 5:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringList(offset)) as P;
+    case 5:
+      return (reader.readDateTime(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (_EntrytypeValueEnumMap[reader.readByteOrNull(offset)] ??
           EntryType.dream) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -382,6 +418,75 @@ extension EntryQueryFilter on QueryBuilder<Entry, Entry, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'content',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'dailyMood',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dailyMood',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodEqualTo(
+      int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dailyMood',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dailyMood',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dailyMood',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dailyMoodBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dailyMood',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -681,73 +786,234 @@ extension EntryQueryFilter on QueryBuilder<Entry, Entry, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Entry, Entry, QAfterFilterCondition> emotionIntensityIsNull() {
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'emotionIntensity',
+        property: r'dreamTags',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'dreamTags',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dreamTags',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'dreamTags',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'dreamTags',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dreamTags',
+        value: '',
       ));
     });
   }
 
   QueryBuilder<Entry, Entry, QAfterFilterCondition>
-      emotionIntensityIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'emotionIntensity',
-      ));
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterFilterCondition> emotionIntensityEqualTo(
-      int? value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'emotionIntensity',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterFilterCondition> emotionIntensityGreaterThan(
-    int? value, {
-    bool include = false,
-  }) {
+      dreamTagsElementIsNotEmpty() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'emotionIntensity',
-        value: value,
+        property: r'dreamTags',
+        value: '',
       ));
     });
   }
 
-  QueryBuilder<Entry, Entry, QAfterFilterCondition> emotionIntensityLessThan(
-    int? value, {
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'dreamTags',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'dreamTags',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'dreamTags',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsLengthLessThan(
+    int length, {
     bool include = false,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'emotionIntensity',
-        value: value,
-      ));
+      return query.listLength(
+        r'dreamTags',
+        0,
+        true,
+        length,
+        include,
+      );
     });
   }
 
-  QueryBuilder<Entry, Entry, QAfterFilterCondition> emotionIntensityBetween(
-    int? lower,
-    int? upper, {
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'dreamTags',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> dreamTagsLengthBetween(
+    int lower,
+    int upper, {
     bool includeLower = true,
     bool includeUpper = true,
   }) {
     return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'emotionIntensity',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
+      return query.listLength(
+        r'dreamTags',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -1052,6 +1318,152 @@ extension EntryQueryFilter on QueryBuilder<Entry, Entry, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'wakeUpMood',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'wakeUpMood',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'wakeUpMood',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'wakeUpMood',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'wakeUpMood',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'wakeUpMood',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> wakeUpMoodIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'wakeUpMood',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension EntryQueryObject on QueryBuilder<Entry, Entry, QFilterCondition> {}
@@ -1068,6 +1480,18 @@ extension EntryQuerySortBy on QueryBuilder<Entry, Entry, QSortBy> {
   QueryBuilder<Entry, Entry, QAfterSortBy> sortByContentDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'content', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByDailyMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyMood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByDailyMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyMood', Sort.desc);
     });
   }
 
@@ -1092,18 +1516,6 @@ extension EntryQuerySortBy on QueryBuilder<Entry, Entry, QSortBy> {
   QueryBuilder<Entry, Entry, QAfterSortBy> sortByDreamFeelingsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dreamFeelings', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterSortBy> sortByEmotionIntensity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'emotionIntensity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterSortBy> sortByEmotionIntensityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'emotionIntensity', Sort.desc);
     });
   }
 
@@ -1142,6 +1554,18 @@ extension EntryQuerySortBy on QueryBuilder<Entry, Entry, QSortBy> {
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByWakeUpMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakeUpMood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByWakeUpMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakeUpMood', Sort.desc);
+    });
+  }
 }
 
 extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
@@ -1154,6 +1578,18 @@ extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
   QueryBuilder<Entry, Entry, QAfterSortBy> thenByContentDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'content', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByDailyMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyMood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByDailyMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyMood', Sort.desc);
     });
   }
 
@@ -1178,18 +1614,6 @@ extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
   QueryBuilder<Entry, Entry, QAfterSortBy> thenByDreamFeelingsDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dreamFeelings', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterSortBy> thenByEmotionIntensity() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'emotionIntensity', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Entry, Entry, QAfterSortBy> thenByEmotionIntensityDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'emotionIntensity', Sort.desc);
     });
   }
 
@@ -1240,6 +1664,18 @@ extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByWakeUpMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakeUpMood', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByWakeUpMoodDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'wakeUpMood', Sort.desc);
+    });
+  }
 }
 
 extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
@@ -1247,6 +1683,12 @@ extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'content', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QDistinct> distinctByDailyMood() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dailyMood');
     });
   }
 
@@ -1266,9 +1708,9 @@ extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
     });
   }
 
-  QueryBuilder<Entry, Entry, QDistinct> distinctByEmotionIntensity() {
+  QueryBuilder<Entry, Entry, QDistinct> distinctByDreamTags() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'emotionIntensity');
+      return query.addDistinctBy(r'dreamTags');
     });
   }
 
@@ -1290,6 +1732,13 @@ extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
       return query.addDistinctBy(r'type');
     });
   }
+
+  QueryBuilder<Entry, Entry, QDistinct> distinctByWakeUpMood(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'wakeUpMood', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
@@ -1305,6 +1754,12 @@ extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Entry, int?, QQueryOperations> dailyMoodProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dailyMood');
+    });
+  }
+
   QueryBuilder<Entry, String?, QQueryOperations> dreamAssociationsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dreamAssociations');
@@ -1317,9 +1772,9 @@ extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Entry, int?, QQueryOperations> emotionIntensityProperty() {
+  QueryBuilder<Entry, List<String>?, QQueryOperations> dreamTagsProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'emotionIntensity');
+      return query.addPropertyName(r'dreamTags');
     });
   }
 
@@ -1338,6 +1793,12 @@ extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
   QueryBuilder<Entry, EntryType, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<Entry, String?, QQueryOperations> wakeUpMoodProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'wakeUpMood');
     });
   }
 }
