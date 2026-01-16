@@ -6,6 +6,7 @@ import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import 'mood_calendar_screen.dart';
 import '../widgets/entry_form.dart';
+import '../widgets/daily_check_in.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -13,10 +14,13 @@ class JournalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          Colors.grey.shade50, // Lighter background for contrast with cards
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
+            const DailyCheckInWidget(),
             Expanded(
               child: Consumer<JournalProvider>(
                 builder: (context, provider, child) {
@@ -41,13 +45,10 @@ class JournalScreen extends StatelessWidget {
                     );
                   }
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
+                    padding: const EdgeInsets.only(top: 16, bottom: 80),
                     itemCount: entries.length,
                     itemBuilder: (context, index) {
                       final entry = entries[index];
-                      // Reverse order to show new first? Usually JournalProvider should sort.
-                      // Assuming provider gives sorted or we display as comes.
-                      // Let's assume provider order is correct or user wants as is.
                       return _EntryCard(entry: entry);
                     },
                   );
@@ -77,15 +78,16 @@ class JournalScreen extends StatelessWidget {
         "${dayName[0].toUpperCase()}${dayName.substring(1)}, $dayNum ${month[0].toUpperCase()}${month.substring(1)}";
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             dateStr,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade800,
+            ),
           ),
           Row(
             children: [
@@ -98,13 +100,13 @@ class JournalScreen extends StatelessWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.calendar_month),
+                icon: const Icon(Icons.calendar_month, color: Colors.grey),
               ),
               IconButton(
                 onPressed: () {
                   // Settings placeholder
                 },
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.settings, color: Colors.grey),
               ),
             ],
           ),
@@ -185,16 +187,9 @@ class JournalScreen extends StatelessWidget {
   }
 }
 
-class _EntryCard extends StatefulWidget {
+class _EntryCard extends StatelessWidget {
   final Entry entry;
   const _EntryCard({required this.entry});
-
-  @override
-  State<_EntryCard> createState() => _EntryCardState();
-}
-
-class _EntryCardState extends State<_EntryCard> {
-  bool _isBlurred = true;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +199,7 @@ class _EntryCardState extends State<_EntryCard> {
     IconData iconData;
     Color dateColor;
 
-    switch (widget.entry.type) {
+    switch (entry.type) {
       case EntryType.dream:
         backgroundColor = Colors.deepPurple.shade50;
         iconColor = Colors.deepPurple;
@@ -212,7 +207,7 @@ class _EntryCardState extends State<_EntryCard> {
         dateColor = Colors.deepPurple.shade300;
         break;
       case EntryType.insight:
-        backgroundColor = Colors.grey.shade50; // Minimalist
+        backgroundColor = Colors.white;
         iconColor = Colors.amber.shade800;
         iconData = Icons.lightbulb_outline;
         dateColor = Colors.grey;
@@ -225,33 +220,15 @@ class _EntryCardState extends State<_EntryCard> {
         break;
     }
 
-    final dateStr = DateFormat('dd/MM HH:mm').format(widget.entry.timestamp);
+    final dateStr = DateFormat('dd/MM HH:mm').format(entry.timestamp);
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _isBlurred = !_isBlurred;
-        });
-      },
-      onLongPress: () {
-        setState(() {
-          _isBlurred = false;
-        });
-      },
-      onLongPressUp: () {
-        setState(() {
-          // Optional: Only unblur while holding? The prompt said "segurar o dedo", implying hold to view?
-          // Or "expandir/clicar" to view permanently.
-          // Prompt: "O usuário deve conseguir ver o conteúdo apenas ao clicar no card (expandir) ou segurar o dedo (long press)."
-          // Let's make tap toggle blur, long press unblur while held (if we could, but longPressUp is reliable).
-          // Actually, let's just stick to toggle on tap for simplicity and better UX.
-          _isBlurred = true;
-        });
-      },
+      onTap: () => _showDetails(context),
       child: Card(
         color: backgroundColor,
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        elevation: 2,
+        elevation: 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -261,142 +238,176 @@ class _EntryCardState extends State<_EntryCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(iconData, color: iconColor),
-                  const SizedBox(width: 12),
+                  Icon(iconData, color: iconColor, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.entry.title ??
-                              _itemTypeTitle(widget.entry.type),
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          dateStr,
-                          style: TextStyle(color: dateColor, fontSize: 12),
-                        ),
-                      ],
+                    child: Text(
+                      entry.title ?? _itemTypeTitle(entry.type),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                  if (widget.entry.dailyMood != null)
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '${widget.entry.dailyMood}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: iconColor,
-                        ),
-                      ),
-                    ),
+                  Text(
+                    dateStr,
+                    style: TextStyle(color: dateColor, fontSize: 12),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
 
-              // Privacy Blur Section
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 300),
-                crossFadeState: _isBlurred
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                firstChild: SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: Stack(
-                    children: [
-                      Text(
-                        widget.entry.content,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Positioned.fill(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-                            child: Container(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                              alignment: Alignment.center,
-                              child: const Icon(
-                                Icons.visibility_off,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                secondChild: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.entry.content,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-
-                    if (widget.entry.wakeUpMood != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        "Acordou: ${widget.entry.wakeUpMood}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                    if (widget.entry.dreamTags != null &&
-                        widget.entry.dreamTags!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 4,
-                        children: widget.entry.dreamTags!
-                            .map(
-                              (t) => Chip(
-                                label: Text(
-                                  t,
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ],
-
-                    if (widget.entry.dreamAssociations != null) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "Associações: ${widget.entry.dreamAssociations}",
-                          style: const TextStyle(
-                            fontStyle: FontStyle.italic,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+              Text(
+                entry.content,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  height: 1.5,
+                  color: Colors.black87,
                 ),
               ),
+
+              if (entry.dreamTags != null && entry.dreamTags!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 4,
+                  children: entry.dreamTags!
+                      .take(3)
+                      .map(
+                        (t) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: iconColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            "#$t",
+                            style: TextStyle(fontSize: 10, color: iconColor),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    entry.title ?? _itemTypeTitle(entry.type),
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    DateFormat(
+                      'dd MMM yyyy, HH:mm',
+                      'pt_BR',
+                    ).format(entry.timestamp),
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Content
+                  Text(
+                    entry.content,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      height: 1.6,
+                      fontSize: 18, // bodyLarge explicitly requested
+                    ),
+                  ),
+
+                  // Extra details
+                  if (entry.wakeUpMood != null) ...[
+                    const SizedBox(height: 20),
+                    Divider(),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Humor ao acordar",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(entry.wakeUpMood!, style: TextStyle(fontSize: 16)),
+                  ],
+
+                  if (entry.dreamAssociations != null &&
+                      entry.dreamAssociations!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      "Associações",
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      entry.dreamAssociations!,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+
+                  if (entry.dreamTags != null &&
+                      entry.dreamTags!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      children: entry.dreamTags!
+                          .map(
+                            (t) => Chip(
+                              label: Text(t),
+                              backgroundColor: Colors.grey.shade100,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                  const SizedBox(height: 40),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
