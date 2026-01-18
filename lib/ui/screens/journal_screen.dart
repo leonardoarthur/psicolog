@@ -14,6 +14,7 @@ class JournalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor:
           Colors.grey.shade50, // Lighter background for contrast with cards
       body: SafeArea(

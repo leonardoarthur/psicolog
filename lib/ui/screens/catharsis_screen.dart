@@ -36,6 +36,7 @@ class _CatharsisScreenState extends State<CatharsisScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: const Text('Catarse')),
       body: Container(
         decoration: BoxDecoration(
