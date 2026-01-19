@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +5,6 @@ import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import 'mood_calendar_screen.dart';
 import '../widgets/entry_form.dart';
-import '../widgets/daily_check_in.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -15,13 +13,12 @@ class JournalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor:
-          Colors.grey.shade50, // Lighter background for contrast with cards
+      // backgroundColor: Colors.transparent, // Let theme handle it
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            const DailyCheckInWidget(),
+            // DailyCheckInWidget removed from here
             Expanded(
               child: Consumer<JournalProvider>(
                 builder: (context, provider, child) {
@@ -87,7 +84,7 @@ class JournalScreen extends StatelessWidget {
             dateStr,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           Row(
@@ -101,13 +98,19 @@ class JournalScreen extends StatelessWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.calendar_month, color: Colors.grey),
+                icon: Icon(
+                  Icons.calendar_month,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               IconButton(
                 onPressed: () {
                   // Settings placeholder
                 },
-                icon: const Icon(Icons.settings, color: Colors.grey),
+                icon: Icon(
+                  Icons.settings,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -194,7 +197,10 @@ class _EntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Style determination
+    // Style determination based on theme
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     Color backgroundColor;
     Color iconColor;
     IconData iconData;
@@ -202,22 +208,30 @@ class _EntryCard extends StatelessWidget {
 
     switch (entry.type) {
       case EntryType.dream:
-        backgroundColor = Colors.deepPurple.shade50;
-        iconColor = Colors.deepPurple;
+        backgroundColor = isDark
+            ? colorScheme.primaryContainer.withValues(alpha: 0.2)
+            : Colors.deepPurple.shade50;
+        iconColor = isDark ? colorScheme.primary : Colors.deepPurple;
         iconData = Icons.nights_stay;
-        dateColor = Colors.deepPurple.shade300;
+        dateColor = isDark
+            ? colorScheme.onSurfaceVariant
+            : Colors.deepPurple.shade300;
         break;
       case EntryType.insight:
-        backgroundColor = Colors.white;
-        iconColor = Colors.amber.shade800;
+        backgroundColor = isDark
+            ? colorScheme.secondaryContainer.withValues(alpha: 0.2)
+            : Colors.white; // Or Amber.shade50
+        iconColor = isDark ? colorScheme.secondary : Colors.amber.shade800;
         iconData = Icons.lightbulb_outline;
-        dateColor = Colors.grey;
+        dateColor = isDark ? colorScheme.onSurfaceVariant : Colors.grey;
         break;
       case EntryType.emotion:
-        backgroundColor = Colors.red.shade50;
-        iconColor = Colors.redAccent;
+        backgroundColor = isDark
+            ? colorScheme.errorContainer.withValues(alpha: 0.2)
+            : Colors.red.shade50;
+        iconColor = isDark ? colorScheme.error : Colors.redAccent;
         iconData = Icons.flash_on;
-        dateColor = Colors.red.shade300;
+        dateColor = isDark ? colorScheme.onSurfaceVariant : Colors.red.shade300;
         break;
     }
 
@@ -264,7 +278,7 @@ class _EntryCard extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   height: 1.5,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
 

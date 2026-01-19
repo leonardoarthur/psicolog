@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../../data/models/entry.dart';
 import '../../logic/providers/journal_provider.dart';
 
+import '../widgets/daily_check_in.dart';
+
 class MoodCalendarScreen extends StatefulWidget {
   const MoodCalendarScreen({super.key});
 
@@ -29,6 +31,7 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
 
           return Column(
             children: [
+              const DailyMoodSelector(),
               HeatMapCalendar(
                 datasets: heatmapData,
                 colorMode: ColorMode.color,
