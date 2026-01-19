@@ -169,23 +169,14 @@ class JournalScreen extends StatelessWidget {
   }
 
   void _showEntryForm(BuildContext context, EntryType type) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return EntryFormWidget(
-            type: type,
-            scrollController: scrollController,
-          );
-        },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EntryFormWidget(
+          type: type,
+          // scrollController passed as dummy or removed if we clean up EntryFormWidget constructor
+          scrollController: ScrollController(),
+        ),
       ),
     );
   }

@@ -89,154 +89,147 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Optimization: Instead of wrapping everything in Padding that changes with viewInsets (causing full rebuild/resize),
-    // we just add the viewInsets to the bottom padding of the ScrollView.
-    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-
-    return ListView(
-      controller: widget.scrollController,
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomPadding),
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              widget.type == EntryType.dream
-                  ? 'Novo Sonho'
-                  : widget.type == EntryType.insight
-                  ? 'Novo Insight'
-                  : 'Nova Emoção',
-              style: Theme.of(context).textTheme.titleLarge,
+    // Optimization: using Scaffold to handle keyboard resize natively avoids
+    // manual rebuilds triggered by MediaQuery.viewInsets on every frame.
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          widget.type == EntryType.dream
+              ? 'Novo Sonho'
+              : widget.type == EntryType.insight
+              ? 'Novo Insight'
+              : 'Nova Emoção',
+        ),
+        actions: [
+          TextButton(
+            onPressed: _save,
+            child: const Text(
+              'SALVAR',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            IconButton(
-              onPressed: _save,
-              icon: const Icon(
-                Icons.check_circle,
-                size: 32,
-                color: Colors.green, // Maybe change to Theme primary
+          ),
+        ],
+      ),
+      body: ListView(
+        // controller: widget.scrollController, // Not needed for full screen
+        padding: const EdgeInsets.all(16),
+        children: [
+          // Row removed (now in AppBar)
+
+          // Title Field for all
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(
+              labelText: _titleLabel,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.title),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Dream Specific Fields
+          if (widget.type == EntryType.dream) ...[
+            Text(
+              'Como acordou?',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: ['Cansado', 'Bem', 'Energizado', 'Assustado', 'Confuso']
+                  .map((mood) {
+                    final isSelected = _selectedWakeUpMood == mood;
+                    return ChoiceChip(
+                      label: Text(mood),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedWakeUpMood = selected ? mood : null;
+                        });
+                      },
+                    );
+                  })
+                  .toList(),
+            ),
+            const SizedBox(height: 16),
+            Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children:
+                  [
+                    'Pesadelo',
+                    'Lúcido',
+                    'Recorrente',
+                    'Fragmentado',
+                    'Premonição',
+                  ].map((tag) {
+                    final isSelected = _selectedTags.contains(tag);
+                    return FilterChip(
+                      label: Text(tag),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedTags.add(tag);
+                          } else {
+                            _selectedTags.remove(tag);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Emotion Specific Fields
+          if (widget.type == EntryType.emotion) ...[
+            Text(
+              'Como foi o dia? ${_intensity.round()}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Slider(
+              value: _intensity,
+              min: 1,
+              max: 5,
+              divisions: 4,
+              label: _intensity.round().toString(),
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: (val) => setState(() => _intensity = val),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Content Field
+          TextField(
+            controller: _contentController,
+            maxLines: 6,
+            decoration: InputDecoration(
+              labelText: _contentLabel,
+              border: const OutlineInputBorder(),
+              alignLabelWithHint: true,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          if (widget.type == EntryType.dream) ...[
+            TextField(
+              controller: _associationsController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Associações / Resto Diurno',
+                hintText: 'O que aconteceu ontem que pode ter puxado isso?',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.link),
               ),
             ),
+            const SizedBox(height: 16),
           ],
-        ),
-        const Divider(),
-        const SizedBox(height: 10),
 
-        // Title Field for all
-        TextField(
-          controller: _titleController,
-          decoration: InputDecoration(
-            labelText: _titleLabel,
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.title),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Dream Specific Fields
-        if (widget.type == EntryType.dream) ...[
-          Text('Como acordou?', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: ['Cansado', 'Bem', 'Energizado', 'Assustado', 'Confuso']
-                .map((mood) {
-                  final isSelected = _selectedWakeUpMood == mood;
-                  return ChoiceChip(
-                    label: Text(mood),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedWakeUpMood = selected ? mood : null;
-                      });
-                    },
-                  );
-                })
-                .toList(),
-          ),
-          const SizedBox(height: 16),
-          Text('Tags', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children:
-                [
-                  'Pesadelo',
-                  'Lúcido',
-                  'Recorrente',
-                  'Fragmentado',
-                  'Premonição',
-                ].map((tag) {
-                  final isSelected = _selectedTags.contains(tag);
-                  return FilterChip(
-                    label: Text(tag),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedTags.add(tag);
-                        } else {
-                          _selectedTags.remove(tag);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-          ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 40), // Extra space at bottom
         ],
-
-        // Emotion Specific Fields
-        if (widget.type == EntryType.emotion) ...[
-          Text(
-            'Como foi o dia? ${_intensity.round()}',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          Slider(
-            value: _intensity,
-            min: 1,
-            max: 5,
-            divisions: 4,
-            label: _intensity.round().toString(),
-            activeColor: Theme.of(context).colorScheme.primary,
-            onChanged: (val) => setState(() => _intensity = val),
-          ),
-          const SizedBox(height: 16),
-        ],
-
-        // Content Field
-        TextField(
-          controller: _contentController,
-          maxLines: 6,
-          decoration: InputDecoration(
-            labelText: _contentLabel,
-            border: const OutlineInputBorder(),
-            alignLabelWithHint: true,
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        if (widget.type == EntryType.dream) ...[
-          TextField(
-            controller: _associationsController,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Associações / Resto Diurno',
-              hintText: 'O que aconteceu ontem que pode ter puxado isso?',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.link),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
-
-        const SizedBox(height: 20),
-        FilledButton.icon(
-          onPressed: _save,
-          icon: const Icon(Icons.save),
-          label: const Text('Salvar Entrada'),
-        ),
-        const SizedBox(height: 20),
-      ],
+      ),
     );
   }
 }

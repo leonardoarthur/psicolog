@@ -42,25 +42,13 @@ class DreamsScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   FilledButton.icon(
                     onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EntryFormWidget(
+                            type: EntryType.dream,
+                            scrollController: ScrollController(),
                           ),
-                        ),
-                        builder: (context) => DraggableScrollableSheet(
-                          initialChildSize: 0.9,
-                          minChildSize: 0.5,
-                          maxChildSize: 0.95,
-                          expand: false,
-                          builder: (context, scrollController) {
-                            return EntryFormWidget(
-                              type: EntryType.dream,
-                              scrollController: scrollController,
-                            );
-                          },
                         ),
                       );
                     },
