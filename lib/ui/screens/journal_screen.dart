@@ -5,6 +5,7 @@ import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import 'mood_calendar_screen.dart';
 import '../widgets/entry_form.dart';
+import 'settings_screen.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -105,7 +106,16 @@ class JournalScreen extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {
-                  // Settings placeholder
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(
+                        databaseService: context
+                            .read<JournalProvider>()
+                            .databaseService,
+                      ),
+                    ),
+                  );
                 },
                 icon: Icon(
                   Icons.settings,

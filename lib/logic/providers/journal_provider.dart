@@ -15,6 +15,7 @@ class JournalProvider extends ChangeNotifier {
 
   List<Entry> get entries => _entries;
   DailyMood? get todayMood => _todayMood;
+  DatabaseService get databaseService => _databaseService;
 
   void _init() {
     _databaseService.watchEntries().listen((entries) {

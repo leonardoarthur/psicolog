@@ -2,6 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/entry.dart';
 import '../models/daily_mood.dart';
+import '../models/app_settings.dart';
 
 class DatabaseService {
   late Future<Isar> db;
@@ -16,6 +17,7 @@ class DatabaseService {
       return await Isar.open([
         EntrySchema,
         DailyMoodSchema,
+        AppSettingsSchema,
       ], directory: dir.path);
     }
     return Future.value(Isar.getInstance());
@@ -38,6 +40,22 @@ class DatabaseService {
     yield* isar.entrys.where().sortByTimestampDesc().watch(
       fireImmediately: true,
     );
+  }
+
+  Future<void> restoreEntries(List<Entry> newEntries) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.entrys.clear(); // Clear existing entries? Or merge?
+      // User decision usually implies replacement or add.
+      // "Restore" typically means bringing back state. To be safe, let's keep it clean or just add.
+      // If we clear, we lose current data not in backup.
+      // Let's assume clear for now as it's a "Restore" action, typically destructive/replacing.
+      // Or safer: putAll (upsert if IDs match, but here IDs are auto-increment so simple putAll adds duplicates if not careful).
+      // Since JSON doesn't keep IDs, they are new entries.
+      // Let's clear for now to avoid duplicates, assuming text backup is a full snapshot.
+      await isar.entrys.clear();
+      await isar.entrys.putAll(newEntries);
+    });
   }
 
   // Daily Mood methods
@@ -65,5 +83,28 @@ class DatabaseService {
   Future<DailyMood?> getDailyMood(DateTime date) async {
     final isar = await db;
     return await isar.dailyMoods.where().dateEqualTo(date).findFirst();
+  }
+
+  // Settings methods
+  Future<AppSettings> getAppSettings() async {
+    final isar = await db;
+    final settings = await isar.appSettings.where().findFirst();
+    if (settings == null) {
+      final newSettings = AppSettings();
+      await isar.writeTxn(() async {
+        await isar.appSettings.put(newSettings);
+      });
+      return newSettings;
+    }
+    return settings;
+  }
+
+  Future<void> updateAppSettings(Function(AppSettings) updateFn) async {
+    final isar = await db;
+    final settings = await getAppSettings();
+    await isar.writeTxn(() async {
+      updateFn(settings);
+      await isar.appSettings.put(settings);
+    });
   }
 }
