@@ -40,6 +40,15 @@ class JournalProvider extends ChangeNotifier {
     await _databaseService.addEntry(entry);
   }
 
+  Future<void> deleteEntry(int id) async {
+    await _databaseService.deleteEntry(id);
+  }
+
+  Future<void> togglePin(Entry entry) async {
+    entry.isPinned = !entry.isPinned;
+    await _databaseService.saveEntry(entry);
+  }
+
   Future<void> setDailyMood(int moodValue) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

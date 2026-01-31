@@ -12,22 +12,17 @@ class BackupService {
 
   BackupService(this._databaseService);
 
+  // Methods removed to revert auto backup logic
+
   Future<void> exportData() async {
     // 1. Fetch all data
     final entries = await _databaseService.getEntries();
-
-    // We need a method to get all daily moods, assuming watchAllDailyMoods exists but we want a Future
-    // So let's add getAllDailyMoods to DatabaseService or use the stream as one-shot.
-    // Ideally DatabaseService should have getAllDailyMoods() Future.
-    // For now I'll stick to entries only as per MVP request, or try to get moods too if possible.
-    // Let's assume we want to backup EVERYTHING important.
 
     // Convert to JSON-encodable map
     final data = {
       'version': 1,
       'timestamp': DateTime.now().toIso8601String(),
       'entries': entries.map((e) => _entryToMap(e)).toList(),
-      // 'dailyMoods': ... (If we want to backup moods, we need to fetch them)
     };
 
     final jsonString = jsonEncode(data);

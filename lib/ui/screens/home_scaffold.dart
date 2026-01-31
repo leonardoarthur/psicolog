@@ -4,6 +4,8 @@ import 'catharsis_screen.dart';
 import 'dreams_screen.dart';
 import 'echoes_screen.dart';
 
+import '../widgets/background_wrapper.dart';
+
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
 
@@ -25,7 +27,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: _screens[_selectedIndex],
+      body: BackgroundWrapper(child: _screens[_selectedIndex]),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {

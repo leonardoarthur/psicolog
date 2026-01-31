@@ -9,6 +9,8 @@ class Entry {
   @enumerated
   late EntryType type;
 
+  bool isPinned = false;
+
   String? title;
 
   late String content;

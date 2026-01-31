@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'data/services/database_service.dart';
 import 'logic/providers/journal_provider.dart';
 import 'logic/providers/echoes_provider.dart';
@@ -11,6 +12,10 @@ import 'ui/screens/lock_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // Initialize date formatting
   await initializeDateFormatting('pt_BR', null);

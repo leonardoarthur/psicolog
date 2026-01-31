@@ -42,24 +42,29 @@ const EntrySchema = CollectionSchema(
       name: r'dreamTags',
       type: IsarType.stringList,
     ),
-    r'timestamp': PropertySchema(
+    r'isPinned': PropertySchema(
       id: 5,
+      name: r'isPinned',
+      type: IsarType.bool,
+    ),
+    r'timestamp': PropertySchema(
+      id: 6,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'type',
       type: IsarType.byte,
       enumMap: _EntrytypeEnumValueMap,
     ),
     r'wakeUpMood': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'wakeUpMood',
       type: IsarType.string,
     )
@@ -135,10 +140,11 @@ void _entrySerialize(
   writer.writeString(offsets[2], object.dreamAssociations);
   writer.writeString(offsets[3], object.dreamFeelings);
   writer.writeStringList(offsets[4], object.dreamTags);
-  writer.writeDateTime(offsets[5], object.timestamp);
-  writer.writeString(offsets[6], object.title);
-  writer.writeByte(offsets[7], object.type.index);
-  writer.writeString(offsets[8], object.wakeUpMood);
+  writer.writeBool(offsets[5], object.isPinned);
+  writer.writeDateTime(offsets[6], object.timestamp);
+  writer.writeString(offsets[7], object.title);
+  writer.writeByte(offsets[8], object.type.index);
+  writer.writeString(offsets[9], object.wakeUpMood);
 }
 
 Entry _entryDeserialize(
@@ -154,11 +160,12 @@ Entry _entryDeserialize(
   object.dreamFeelings = reader.readStringOrNull(offsets[3]);
   object.dreamTags = reader.readStringList(offsets[4]);
   object.id = id;
-  object.timestamp = reader.readDateTime(offsets[5]);
-  object.title = reader.readStringOrNull(offsets[6]);
-  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[7])] ??
+  object.isPinned = reader.readBool(offsets[5]);
+  object.timestamp = reader.readDateTime(offsets[6]);
+  object.title = reader.readStringOrNull(offsets[7]);
+  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[8])] ??
       EntryType.dream;
-  object.wakeUpMood = reader.readStringOrNull(offsets[8]);
+  object.wakeUpMood = reader.readStringOrNull(offsets[9]);
   return object;
 }
 
@@ -180,13 +187,15 @@ P _entryDeserializeProp<P>(
     case 4:
       return (reader.readStringList(offset)) as P;
     case 5:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (_EntrytypeValueEnumMap[reader.readByteOrNull(offset)] ??
           EntryType.dream) as P;
-    case 8:
+    case 9:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1069,6 +1078,16 @@ extension EntryQueryFilter on QueryBuilder<Entry, Entry, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> isPinnedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isPinned',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterFilterCondition> timestampEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1519,6 +1538,18 @@ extension EntryQuerySortBy on QueryBuilder<Entry, Entry, QSortBy> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByIsPinnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -1629,6 +1660,18 @@ extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByIsPinnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -1714,6 +1757,12 @@ extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QDistinct> distinctByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isPinned');
+    });
+  }
+
   QueryBuilder<Entry, Entry, QDistinct> distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
@@ -1775,6 +1824,12 @@ extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
   QueryBuilder<Entry, List<String>?, QQueryOperations> dreamTagsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dreamTags');
+    });
+  }
+
+  QueryBuilder<Entry, bool, QQueryOperations> isPinnedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isPinned');
     });
   }
 

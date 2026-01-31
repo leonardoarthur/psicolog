@@ -23,10 +23,20 @@ class DatabaseService {
     return Future.value(Isar.getInstance());
   }
 
-  Future<void> addEntry(Entry entry) async {
+  Future<void> saveEntry(Entry entry) async {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.entrys.put(entry);
+    });
+  }
+
+  // Alias for backward compatibility if needed, or just use saveEntry
+  Future<void> addEntry(Entry entry) => saveEntry(entry);
+
+  Future<void> deleteEntry(Id id) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.entrys.delete(id);
     });
   }
 
@@ -37,7 +47,7 @@ class DatabaseService {
 
   Stream<List<Entry>> watchEntries() async* {
     final isar = await db;
-    yield* isar.entrys.where().sortByTimestampDesc().watch(
+    yield* isar.entrys.where().sortByIsPinnedDesc().thenByTimestampDesc().watch(
       fireImmediately: true,
     );
   }

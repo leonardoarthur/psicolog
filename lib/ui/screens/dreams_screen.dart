@@ -17,6 +17,7 @@ class DreamsScreen extends StatelessWidget {
     if (hour >= 18) greeting = 'Boa noite';
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [

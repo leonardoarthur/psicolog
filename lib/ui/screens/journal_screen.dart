@@ -14,7 +14,7 @@ class JournalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      // backgroundColor: Colors.transparent, // Let theme handle it
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Column(
           children: [
@@ -199,40 +199,24 @@ class _EntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Style determination based on theme
-    final colorScheme = Theme.of(context).colorScheme;
+    // final colorScheme = Theme.of(context).colorScheme; // Not used currently
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    Color backgroundColor;
-    Color iconColor;
+    Color accentColor;
     IconData iconData;
-    Color dateColor;
 
     switch (entry.type) {
       case EntryType.dream:
-        backgroundColor = isDark
-            ? colorScheme.primaryContainer.withValues(alpha: 0.2)
-            : Colors.deepPurple.shade50;
-        iconColor = isDark ? colorScheme.primary : Colors.deepPurple;
+        accentColor = isDark ? const Color(0xFFD1C4E9) : Colors.deepPurple;
         iconData = Icons.nights_stay;
-        dateColor = isDark
-            ? colorScheme.onSurfaceVariant
-            : Colors.deepPurple.shade300;
         break;
       case EntryType.insight:
-        backgroundColor = isDark
-            ? colorScheme.secondaryContainer.withValues(alpha: 0.2)
-            : Colors.white; // Or Amber.shade50
-        iconColor = isDark ? colorScheme.secondary : Colors.amber.shade800;
+        accentColor = isDark ? const Color(0xFFFFCC80) : Colors.amber.shade800;
         iconData = Icons.lightbulb_outline;
-        dateColor = isDark ? colorScheme.onSurfaceVariant : Colors.grey;
         break;
       case EntryType.emotion:
-        backgroundColor = isDark
-            ? colorScheme.errorContainer.withValues(alpha: 0.2)
-            : Colors.red.shade50;
-        iconColor = isDark ? colorScheme.error : Colors.redAccent;
+        accentColor = isDark ? const Color(0xFFEF9A9A) : Colors.redAccent;
         iconData = Icons.flash_on;
-        dateColor = isDark ? colorScheme.onSurfaceVariant : Colors.red.shade300;
         break;
     }
 
@@ -240,11 +224,14 @@ class _EntryCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () => _showDetails(context),
+      onLongPress: () => _showOptions(context),
       child: Card(
-        color: backgroundColor,
+        // Theme handles color, we just override shape for border
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: accentColor.withValues(alpha: 0.5), width: 1),
+        ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -254,20 +241,35 @@ class _EntryCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(iconData, color: iconColor, size: 20),
+                  Icon(iconData, color: accentColor, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      entry.title ?? _itemTypeTitle(entry.type),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                    child: Row(
+                      children: [
+                        if (entry.isPinned) ...[
+                          Icon(Icons.push_pin, size: 14, color: accentColor),
+                          const SizedBox(width: 4),
+                        ],
+                        Flexible(
+                          child: Text(
+                            entry.title ?? _itemTypeTitle(entry.type),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   Text(
                     dateStr,
-                    style: TextStyle(color: dateColor, fontSize: 12),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -296,12 +298,12 @@ class _EntryCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: iconColor.withValues(alpha: 0.1),
+                            color: accentColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             "#$t",
-                            style: TextStyle(fontSize: 10, color: iconColor),
+                            style: TextStyle(fontSize: 10, color: accentColor),
                           ),
                         ),
                       )
@@ -424,6 +426,86 @@ class _EntryCard extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(
+                  entry.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                ),
+                title: Text(entry.isPinned ? 'Desafixar' : 'Fixar'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<JournalProvider>().togglePin(entry);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Editar'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showEntryFormWithEntry(context, entry);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Excluir',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmDelete(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEntryFormWithEntry(BuildContext context, Entry entry) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EntryFormWidget(
+          type: entry.type,
+          scrollController: ScrollController(),
+          entryToEdit: entry,
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir entrada?'),
+        content: const Text('Essa ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('CANCELAR'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              context.read<JournalProvider>().deleteEntry(entry.id);
+            },
+            child: const Text('EXCLUIR', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
