@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
+import '../../data/models/app_settings.dart';
 import '../widgets/entry_form.dart';
+import '../widgets/expandable_dream_text.dart';
 
 class DreamsScreen extends StatelessWidget {
   const DreamsScreen({super.key});
@@ -26,16 +28,26 @@ class DreamsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    '$greeting, Leonardo',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                  FutureBuilder<AppSettings>(
+                    future: context
+                        .read<JournalProvider>()
+                        .databaseService
+                        .getAppSettings(), // Access cached usage or just fetch
+                    builder: (context, snapshot) {
+                      final name = snapshot.data?.userName ?? 'Visitante';
+                      return Text(
+                        '$greeting, $name',
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pr pronto para registrar seus sonhos?',
+                    'Pronto para registrar seus sonhos?',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -193,12 +205,7 @@ class _DreamTimelineItem extends StatelessWidget {
                         .toList(),
                   ),
                 ),
-              Text(
-                dream.content,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              ExpandableDreamText(text: dream.content),
             ],
           ),
         ),

@@ -23,6 +23,28 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
+// Fix for isar_flutter_libs and other plugins needing higher compileSdk
+subprojects {
+    val configureSdk = {
+        val android = project.extensions.findByName("android")
+        if (android != null) {
+            try {
+                // Force compileSdkVersion to 34 to avoid lStar errors
+                val method = android.javaClass.getMethod("compileSdkVersion", Int::class.javaPrimitiveType)
+                method.invoke(android, 34)
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
+
+    if (project.state.executed) {
+        configureSdk()
+    } else {
+        afterEvaluate { configureSdk() }
+    }
+}
+
 subprojects {
     val configureNamespace = {
         if (project.name == "isar_flutter_libs") {

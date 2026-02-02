@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'catharsis_screen.dart';
 import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import 'mood_calendar_screen.dart';
@@ -23,12 +24,14 @@ class JournalScreen extends StatelessWidget {
             Expanded(
               child: Consumer<JournalProvider>(
                 builder: (context, provider, child) {
-                  final entries = provider.entries;
+                  final entries = provider.entries
+                      .where((e) => e.type != EntryType.therapy)
+                      .toList();
                   if (entries.isEmpty) {
-                    return Center(
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(
                             Icons.book_outlined,
                             size: 64,
@@ -74,7 +77,7 @@ class JournalScreen extends StatelessWidget {
     final dayNum = DateFormat('d', 'pt_BR').format(now);
     final month = DateFormat('MMM', 'pt_BR').format(now);
     final dateStr =
-        "${dayName[0].toUpperCase()}${dayName.substring(1)}, $dayNum ${month[0].toUpperCase()}${month.substring(1)}";
+        '${dayName[0].toUpperCase()}${dayName.substring(1)}, $dayNum ${month[0].toUpperCase()}${month.substring(1)}';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
@@ -101,6 +104,20 @@ class JournalScreen extends StatelessWidget {
                 },
                 icon: Icon(
                   Icons.calendar_month,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CatharsisScreen(),
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.local_fire_department,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -162,15 +179,6 @@ class JournalScreen extends StatelessWidget {
                   _showEntryForm(context, EntryType.insight);
                 },
               ),
-              ListTile(
-                leading: const Icon(Icons.flash_on, color: Colors.redAccent),
-                title: const Text('Emoção Intensa'),
-                subtitle: const Text('Registre o que está sentindo.'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEntryForm(context, EntryType.emotion);
-                },
-              ),
             ],
           ),
         );
@@ -217,6 +225,10 @@ class _EntryCard extends StatelessWidget {
       case EntryType.emotion:
         accentColor = isDark ? const Color(0xFFEF9A9A) : Colors.redAccent;
         iconData = Icons.flash_on;
+        break;
+      case EntryType.therapy:
+        accentColor = isDark ? Colors.tealAccent : Colors.teal;
+        iconData = Icons.self_improvement;
         break;
     }
 
@@ -302,7 +314,7 @@ class _EntryCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            "#$t",
+                            '#$t',
                             style: TextStyle(fontSize: 10, color: accentColor),
                           ),
                         ),
@@ -376,23 +388,23 @@ class _EntryCard extends StatelessWidget {
                   // Extra details
                   if (entry.wakeUpMood != null) ...[
                     const SizedBox(height: 20),
-                    Divider(),
+                    const Divider(),
                     const SizedBox(height: 10),
-                    Text(
-                      "Humor ao acordar",
+                    const Text(
+                      'Humor ao acordar',
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(entry.wakeUpMood!, style: TextStyle(fontSize: 16)),
+                    Text(entry.wakeUpMood!, style: const TextStyle(fontSize: 16)),
                   ],
 
                   if (entry.dreamAssociations != null &&
                       entry.dreamAssociations!.isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    Text(
-                      "Associações",
+                    const Text(
+                      'Associações',
                       style: TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.bold,
@@ -400,7 +412,7 @@ class _EntryCard extends StatelessWidget {
                     ),
                     Text(
                       entry.dreamAssociations!,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                   ],
 
@@ -512,11 +524,13 @@ class _EntryCard extends StatelessWidget {
   String _itemTypeTitle(EntryType type) {
     switch (type) {
       case EntryType.dream:
-        return "Sonho";
+        return 'Sonho';
       case EntryType.insight:
-        return "Insight";
+        return 'Insight';
       case EntryType.emotion:
-        return "Emoção";
+        return 'Emoção';
+      case EntryType.therapy:
+        return 'Terapia';
     }
   }
 }

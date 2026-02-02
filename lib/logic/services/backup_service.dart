@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../data/services/database_service.dart';
 import '../../data/models/entry.dart';
+import '../../services/logger_service.dart';
 
 class BackupService {
   final DatabaseService _databaseService;
@@ -69,8 +70,8 @@ class BackupService {
       await _databaseService.restoreEntries(newEntries);
 
       return true;
-    } catch (e) {
-      print('Erro ao restaurar: $e');
+    } catch (e, stack) {
+      LoggerService.log('Erro ao restaurar: $e', e, stack);
       return false;
     }
   }

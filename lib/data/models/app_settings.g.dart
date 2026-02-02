@@ -21,6 +21,31 @@ const AppSettingsSchema = CollectionSchema(
       id: 0,
       name: r'isBiometricEnabled',
       type: IsarType.bool,
+    ),
+    r'isOnboardingCompleted': PropertySchema(
+      id: 1,
+      name: r'isOnboardingCompleted',
+      type: IsarType.bool,
+    ),
+    r'therapyDayOfWeek': PropertySchema(
+      id: 2,
+      name: r'therapyDayOfWeek',
+      type: IsarType.long,
+    ),
+    r'therapyHour': PropertySchema(
+      id: 3,
+      name: r'therapyHour',
+      type: IsarType.long,
+    ),
+    r'therapyMinute': PropertySchema(
+      id: 4,
+      name: r'therapyMinute',
+      type: IsarType.long,
+    ),
+    r'userName': PropertySchema(
+      id: 5,
+      name: r'userName',
+      type: IsarType.string,
     )
   },
   estimateSize: _appSettingsEstimateSize,
@@ -43,6 +68,12 @@ int _appSettingsEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.userName;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -53,6 +84,11 @@ void _appSettingsSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.isBiometricEnabled);
+  writer.writeBool(offsets[1], object.isOnboardingCompleted);
+  writer.writeLong(offsets[2], object.therapyDayOfWeek);
+  writer.writeLong(offsets[3], object.therapyHour);
+  writer.writeLong(offsets[4], object.therapyMinute);
+  writer.writeString(offsets[5], object.userName);
 }
 
 AppSettings _appSettingsDeserialize(
@@ -64,6 +100,11 @@ AppSettings _appSettingsDeserialize(
   final object = AppSettings();
   object.id = id;
   object.isBiometricEnabled = reader.readBool(offsets[0]);
+  object.isOnboardingCompleted = reader.readBool(offsets[1]);
+  object.therapyDayOfWeek = reader.readLongOrNull(offsets[2]);
+  object.therapyHour = reader.readLongOrNull(offsets[3]);
+  object.therapyMinute = reader.readLongOrNull(offsets[4]);
+  object.userName = reader.readStringOrNull(offsets[5]);
   return object;
 }
 
@@ -76,6 +117,16 @@ P _appSettingsDeserializeProp<P>(
   switch (propertyId) {
     case 0:
       return (reader.readBool(offset)) as P;
+    case 1:
+      return (reader.readBool(offset)) as P;
+    case 2:
+      return (reader.readLongOrNull(offset)) as P;
+    case 3:
+      return (reader.readLongOrNull(offset)) as P;
+    case 4:
+      return (reader.readLongOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -236,6 +287,391 @@ extension AppSettingsQueryFilter
       ));
     });
   }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      isOnboardingCompletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isOnboardingCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'therapyDayOfWeek',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'therapyDayOfWeek',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'therapyDayOfWeek',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'therapyDayOfWeek',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'therapyDayOfWeek',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyDayOfWeekBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'therapyDayOfWeek',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'therapyHour',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'therapyHour',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'therapyHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'therapyHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'therapyHour',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyHourBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'therapyHour',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'therapyMinute',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'therapyMinute',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'therapyMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'therapyMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'therapyMinute',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      therapyMinuteBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'therapyMinute',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'userName',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'userName',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition> userNameEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition> userNameBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'userName',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'userName',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition> userNameMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'userName',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'userName',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      userNameIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'userName',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension AppSettingsQueryObject
@@ -257,6 +693,71 @@ extension AppSettingsQuerySortBy
       sortByIsBiometricEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isBiometricEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByIsOnboardingCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnboardingCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByIsOnboardingCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnboardingCompleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByTherapyDayOfWeek() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyDayOfWeek', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByTherapyDayOfWeekDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyDayOfWeek', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByTherapyHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyHour', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByTherapyHourDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyHour', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByTherapyMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyMinute', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      sortByTherapyMinuteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyMinute', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByUserName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByUserNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.desc);
     });
   }
 }
@@ -288,6 +789,71 @@ extension AppSettingsQuerySortThenBy
       return query.addSortBy(r'isBiometricEnabled', Sort.desc);
     });
   }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByIsOnboardingCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnboardingCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByIsOnboardingCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isOnboardingCompleted', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByTherapyDayOfWeek() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyDayOfWeek', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByTherapyDayOfWeekDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyDayOfWeek', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByTherapyHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyHour', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByTherapyHourDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyHour', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByTherapyMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyMinute', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
+      thenByTherapyMinuteDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyMinute', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByUserName() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByUserNameDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'userName', Sort.desc);
+    });
+  }
 }
 
 extension AppSettingsQueryWhereDistinct
@@ -296,6 +862,39 @@ extension AppSettingsQueryWhereDistinct
       distinctByIsBiometricEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isBiometricEnabled');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct>
+      distinctByIsOnboardingCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isOnboardingCompleted');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct>
+      distinctByTherapyDayOfWeek() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'therapyDayOfWeek');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct> distinctByTherapyHour() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'therapyHour');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct> distinctByTherapyMinute() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'therapyMinute');
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QDistinct> distinctByUserName(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'userName', caseSensitive: caseSensitive);
     });
   }
 }
@@ -312,6 +911,37 @@ extension AppSettingsQueryProperty
       isBiometricEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isBiometricEnabled');
+    });
+  }
+
+  QueryBuilder<AppSettings, bool, QQueryOperations>
+      isOnboardingCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isOnboardingCompleted');
+    });
+  }
+
+  QueryBuilder<AppSettings, int?, QQueryOperations> therapyDayOfWeekProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'therapyDayOfWeek');
+    });
+  }
+
+  QueryBuilder<AppSettings, int?, QQueryOperations> therapyHourProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'therapyHour');
+    });
+  }
+
+  QueryBuilder<AppSettings, int?, QQueryOperations> therapyMinuteProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'therapyMinute');
+    });
+  }
+
+  QueryBuilder<AppSettings, String?, QQueryOperations> userNameProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'userName');
     });
   }
 }

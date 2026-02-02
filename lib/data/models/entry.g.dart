@@ -47,24 +47,29 @@ const EntrySchema = CollectionSchema(
       name: r'isPinned',
       type: IsarType.bool,
     ),
-    r'timestamp': PropertySchema(
+    r'therapyKeyLesson': PropertySchema(
       id: 6,
+      name: r'therapyKeyLesson',
+      type: IsarType.string,
+    ),
+    r'timestamp': PropertySchema(
+      id: 7,
       name: r'timestamp',
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'type',
       type: IsarType.byte,
       enumMap: _EntrytypeEnumValueMap,
     ),
     r'wakeUpMood': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'wakeUpMood',
       type: IsarType.string,
     )
@@ -115,6 +120,12 @@ int _entryEstimateSize(
     }
   }
   {
+    final value = object.therapyKeyLesson;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
     final value = object.title;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -141,10 +152,11 @@ void _entrySerialize(
   writer.writeString(offsets[3], object.dreamFeelings);
   writer.writeStringList(offsets[4], object.dreamTags);
   writer.writeBool(offsets[5], object.isPinned);
-  writer.writeDateTime(offsets[6], object.timestamp);
-  writer.writeString(offsets[7], object.title);
-  writer.writeByte(offsets[8], object.type.index);
-  writer.writeString(offsets[9], object.wakeUpMood);
+  writer.writeString(offsets[6], object.therapyKeyLesson);
+  writer.writeDateTime(offsets[7], object.timestamp);
+  writer.writeString(offsets[8], object.title);
+  writer.writeByte(offsets[9], object.type.index);
+  writer.writeString(offsets[10], object.wakeUpMood);
 }
 
 Entry _entryDeserialize(
@@ -161,11 +173,12 @@ Entry _entryDeserialize(
   object.dreamTags = reader.readStringList(offsets[4]);
   object.id = id;
   object.isPinned = reader.readBool(offsets[5]);
-  object.timestamp = reader.readDateTime(offsets[6]);
-  object.title = reader.readStringOrNull(offsets[7]);
-  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[8])] ??
+  object.therapyKeyLesson = reader.readStringOrNull(offsets[6]);
+  object.timestamp = reader.readDateTime(offsets[7]);
+  object.title = reader.readStringOrNull(offsets[8]);
+  object.type = _EntrytypeValueEnumMap[reader.readByteOrNull(offsets[9])] ??
       EntryType.dream;
-  object.wakeUpMood = reader.readStringOrNull(offsets[9]);
+  object.wakeUpMood = reader.readStringOrNull(offsets[10]);
   return object;
 }
 
@@ -189,13 +202,15 @@ P _entryDeserializeProp<P>(
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
-      return (reader.readDateTime(offset)) as P;
-    case 7:
       return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readDateTime(offset)) as P;
     case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
       return (_EntrytypeValueEnumMap[reader.readByteOrNull(offset)] ??
           EntryType.dream) as P;
-    case 9:
+    case 10:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -206,11 +221,13 @@ const _EntrytypeEnumValueMap = {
   'dream': 0,
   'insight': 1,
   'emotion': 2,
+  'therapy': 3,
 };
 const _EntrytypeValueEnumMap = {
   0: EntryType.dream,
   1: EntryType.insight,
   2: EntryType.emotion,
+  3: EntryType.therapy,
 };
 
 Id _entryGetId(Entry object) {
@@ -1088,6 +1105,154 @@ extension EntryQueryFilter on QueryBuilder<Entry, Entry, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'therapyKeyLesson',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition>
+      therapyKeyLessonIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'therapyKeyLesson',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'therapyKeyLesson',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'therapyKeyLesson',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'therapyKeyLesson',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition> therapyKeyLessonIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'therapyKeyLesson',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterFilterCondition>
+      therapyKeyLessonIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'therapyKeyLesson',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterFilterCondition> timestampEqualTo(
       DateTime value) {
     return QueryBuilder.apply(this, (query) {
@@ -1550,6 +1715,18 @@ extension EntryQuerySortBy on QueryBuilder<Entry, Entry, QSortBy> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByTherapyKeyLesson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyKeyLesson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> sortByTherapyKeyLessonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyKeyLesson', Sort.desc);
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterSortBy> sortByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -1672,6 +1849,18 @@ extension EntryQuerySortThenBy on QueryBuilder<Entry, Entry, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByTherapyKeyLesson() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyKeyLesson', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Entry, Entry, QAfterSortBy> thenByTherapyKeyLessonDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'therapyKeyLesson', Sort.desc);
+    });
+  }
+
   QueryBuilder<Entry, Entry, QAfterSortBy> thenByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'timestamp', Sort.asc);
@@ -1763,6 +1952,14 @@ extension EntryQueryWhereDistinct on QueryBuilder<Entry, Entry, QDistinct> {
     });
   }
 
+  QueryBuilder<Entry, Entry, QDistinct> distinctByTherapyKeyLesson(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'therapyKeyLesson',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Entry, Entry, QDistinct> distinctByTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'timestamp');
@@ -1830,6 +2027,12 @@ extension EntryQueryProperty on QueryBuilder<Entry, Entry, QQueryProperty> {
   QueryBuilder<Entry, bool, QQueryOperations> isPinnedProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isPinned');
+    });
+  }
+
+  QueryBuilder<Entry, String?, QQueryOperations> therapyKeyLessonProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'therapyKeyLesson');
     });
   }
 

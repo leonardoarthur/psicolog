@@ -5,10 +5,12 @@ import 'data/services/database_service.dart';
 import 'logic/providers/journal_provider.dart';
 import 'logic/providers/echoes_provider.dart';
 import 'logic/services/text_analysis_service.dart';
+import 'services/notification_service.dart';
 import 'ui/app_theme.dart';
 import 'ui/screens/home_scaffold.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'ui/screens/lock_screen.dart';
+import 'ui/screens/onboarding/onboarding_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +25,7 @@ void main() async {
   // Initialize Services (Singletons usually, or via DI)
   final databaseService = DatabaseService();
   final textAnalysisService = TextAnalysisService();
+  await NotificationService().init();
 
   // Ensure DB is ready before app starts (optional, but good for stability)
   await databaseService.db;
@@ -30,6 +33,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        Provider<DatabaseService>.value(value: databaseService),
         ChangeNotifierProvider(create: (_) => JournalProvider(databaseService)),
         ChangeNotifierProvider(
           create: (_) => EchoesProvider(databaseService, textAnalysisService),
@@ -45,10 +49,13 @@ class PsicoLogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'PsicoLog',
       debugShowCheckedModeBanner: false,
-      home: _AppLoader(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: const _AppLoader(),
     );
   }
 }
@@ -63,6 +70,7 @@ class _AppLoader extends StatefulWidget {
 class _AppLoaderState extends State<_AppLoader> {
   bool _isLoading = true;
   bool _isLocked = false;
+  bool _isOnboardingCompleted = false;
 
   @override
   void initState() {
@@ -72,25 +80,13 @@ class _AppLoaderState extends State<_AppLoader> {
 
   Future<void> _checkSecurity() async {
     final journalProvider = context.read<JournalProvider>();
-    // final isar = await journalProvider.databaseService.db; // Not needed explicitly here
-
-    // We need to access AppSettings. Since we don't have a dedicated provider for Settings yet,
-    // we use DatabaseService directly via JournalProvider or create a new one.
-    // Ideally DatabaseService should expose this.
-
     final settings = await journalProvider.databaseService.getAppSettings();
 
-    if (settings.isBiometricEnabled) {
-      setState(() {
-        _isLocked = true;
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _isLocked = false;
-        _isLoading = false;
-      });
-    }
+    setState(() {
+      _isOnboardingCompleted = settings.isOnboardingCompleted;
+      _isLocked = settings.isBiometricEnabled;
+      _isLoading = false;
+    });
   }
 
   void _onAuthenticated() {
@@ -105,17 +101,14 @@ class _AppLoaderState extends State<_AppLoader> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    if (!_isOnboardingCompleted) {
+      return const OnboardingScreen();
+    }
+
     if (_isLocked) {
       return LockScreen(onAuthenticated: _onAuthenticated);
     }
 
-    return MaterialApp(
-      title: 'PsicoLog',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const MainScaffold(),
-    );
+    return const MainScaffold();
   }
 }

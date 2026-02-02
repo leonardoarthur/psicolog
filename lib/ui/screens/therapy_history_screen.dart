@@ -1,0 +1,294 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../../logic/providers/journal_provider.dart';
+import '../../data/models/entry.dart';
+import '../widgets/entry_form.dart';
+
+class TherapyHistoryScreen extends StatelessWidget {
+  const TherapyHistoryScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                'Minha Terapia',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Consumer<JournalProvider>(
+                builder: (context, provider, child) {
+                  final entries = provider.entries
+                      .where((e) => e.type == EntryType.therapy)
+                      .toList();
+
+                  if (entries.isEmpty) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.self_improvement,
+                            size: 64,
+                            color: Colors.teal,
+                          ),
+                          SizedBox(height: 16),
+                          Text('Nenhuma sessão registrada.'),
+                        ],
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: entries.length,
+                    itemBuilder: (context, index) {
+                      final entry = entries[index];
+                      return _TherapyCard(entry: entry);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EntryFormWidget(
+                type: EntryType.therapy,
+                scrollController: ScrollController(),
+              ),
+            ),
+          );
+        },
+        label: const Text('Nova Sessão'),
+        icon: const Icon(Icons.add),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+      ),
+    );
+  }
+}
+
+class _TherapyCard extends StatelessWidget {
+  final Entry entry;
+  const _TherapyCard({required this.entry});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onLongPress: () => _showOptions(context),
+      onTap: () => _showOptions(
+        context,
+      ), // Also on tap for easier access? Or maybe just LongPress? User said "Assim como no 'Diário' o usuario pode editar os card da 'Terapia'" which implies same interaction. Diary has Tap->Details, LongPress->Options. Therapy card is already full content, so maybe Tap->Edit or Options. Let's do Options on Tap for simplicity as there is no detail view needed.
+      child: Card(
+        elevation: 4,
+        shadowColor: Colors.teal.withValues(alpha: 0.2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        DateFormat(
+                          'dd MMM yyyy, HH:mm',
+                          'pt_BR',
+                        ).format(entry.timestamp),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (entry.isPinned)
+                    const Icon(Icons.push_pin, size: 16, color: Colors.teal),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Content (Resumo)
+              Text(
+                entry.content,
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.6,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.8),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Reflection Highlight (O que mais te fez refletir)
+              if (entry.therapyKeyLesson != null &&
+                  entry.therapyKeyLesson!.isNotEmpty) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.teal.withValues(alpha: 0.15),
+                        Colors.teal.withValues(alpha: 0.05),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.teal.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.auto_awesome,
+                            size: 18,
+                            color: Colors.teal,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'REFLEXÃO',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal[800],
+                              fontSize: 12,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        entry.therapyKeyLesson!,
+                        style: TextStyle(
+                          color: Colors.teal[900],
+                          fontStyle: FontStyle.italic,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(
+                  entry.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
+                  color: Colors.teal,
+                ),
+                title: Text(entry.isPinned ? 'Desafixar' : 'Fixar'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  context.read<JournalProvider>().togglePin(entry);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.edit, color: Colors.blue),
+                title: const Text('Editar'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _showEntryFormWithEntry(context, entry);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text(
+                  'Excluir',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmDelete(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEntryFormWithEntry(BuildContext context, Entry entry) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EntryFormWidget(
+          type: entry.type,
+          scrollController: ScrollController(),
+          entryToEdit: entry,
+        ),
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Excluir sessão?'),
+        content: const Text('Essa ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('CANCELAR'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx); // Close dialog
+              context.read<JournalProvider>().deleteEntry(entry.id);
+            },
+            child: const Text('EXCLUIR', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+}

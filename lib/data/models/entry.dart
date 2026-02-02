@@ -25,7 +25,9 @@ class Entry {
 
   List<String>? dreamTags; // For dreams
 
+  String? therapyKeyLesson; // For therapy
+
   late DateTime timestamp;
 }
 
-enum EntryType { dream, insight, emotion }
+enum EntryType { dream, insight, emotion, therapy }

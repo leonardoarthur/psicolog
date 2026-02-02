@@ -39,10 +39,11 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
                 textColor: Theme.of(context).textTheme.bodyMedium?.color,
                 showColorTip: false, // Clean look
                 colorsets: {
-                  1: Colors.grey[300]!,
-                  2: Colors.purpleAccent,
-                  3: Colors.orange,
-                  4: Colors.red[800]!,
+                  1: Colors.redAccent,
+                  2: Colors.orangeAccent,
+                  3: Colors.amber,
+                  4: Colors.lightGreen,
+                  5: Colors.green,
                 },
                 onClick: (value) {
                   setState(() {
@@ -106,6 +107,8 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
         return const Icon(Icons.favorite, color: Colors.redAccent);
       case EntryType.insight:
         return const Icon(Icons.lightbulb, color: Colors.amber);
+      case EntryType.therapy:
+        return const Icon(Icons.self_improvement, color: Colors.teal);
     }
   }
 }

@@ -8,6 +8,13 @@ class AppSettings {
 
   bool isBiometricEnabled = false;
 
+  String? userName;
+  bool isOnboardingCompleted = false;
+
+  int? therapyDayOfWeek; // 1=Mon, 7=Sun
+  int? therapyHour;
+  int? therapyMinute;
+
   // Singleton pattern helper for Isar
   static Future<AppSettings> get(Isar isar) async {
     final settings = await isar.appSettings.where().findFirst();

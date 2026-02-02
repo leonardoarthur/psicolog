@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'journal_screen.dart';
-import 'catharsis_screen.dart';
+
+import 'therapy_history_screen.dart';
 import 'dreams_screen.dart';
 import 'echoes_screen.dart';
 
@@ -19,7 +20,7 @@ class _MainScaffoldState extends State<MainScaffold> {
   final List<Widget> _screens = const [
     DreamsScreen(),
     JournalScreen(),
-    CatharsisScreen(),
+    TherapyHistoryScreen(),
     EchoesScreen(),
   ];
 
@@ -47,9 +48,9 @@ class _MainScaffoldState extends State<MainScaffold> {
             label: 'Diário',
           ),
           NavigationDestination(
-            icon: Icon(Icons.local_fire_department_outlined),
-            selectedIcon: Icon(Icons.local_fire_department),
-            label: 'Catarse',
+            icon: Icon(Icons.self_improvement_outlined),
+            selectedIcon: Icon(Icons.self_improvement),
+            label: 'Terapia',
           ),
           NavigationDestination(
             icon: Icon(Icons.graphic_eq),

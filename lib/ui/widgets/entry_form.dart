@@ -25,6 +25,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _associationsController = TextEditingController();
+  final _keyLessonController = TextEditingController();
 
   String? _selectedWakeUpMood;
   final List<String> _selectedTags = [];
@@ -45,6 +46,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
       if (e.dailyMood != null) {
         _intensity = e.dailyMood!.toDouble();
       }
+      _keyLessonController.text = e.therapyKeyLesson ?? '';
     }
   }
 
@@ -53,6 +55,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
     _titleController.dispose();
     _contentController.dispose();
     _associationsController.dispose();
+    _keyLessonController.dispose();
     super.dispose();
   }
 
@@ -87,6 +90,8 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
           : null;
     } else if (widget.type == EntryType.emotion) {
       entry.dailyMood = _intensity.round();
+    } else if (widget.type == EntryType.therapy) {
+      entry.therapyKeyLesson = _keyLessonController.text;
     }
 
     context.read<JournalProvider>().addEntry(entry);
@@ -101,6 +106,8 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
         return 'Título do Insight';
       case EntryType.emotion:
         return 'Humor';
+      case EntryType.therapy:
+        return 'Título da Sessão (Opcional)';
     }
   }
 
@@ -112,6 +119,8 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
         return 'Descreva seu insight...';
       case EntryType.emotion:
         return 'Observação sobre o dia (opcional)';
+      case EntryType.therapy:
+        return 'Fale um pouco sobre a sessão...';
     }
   }
 
@@ -127,40 +136,65 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
                     ? 'Novo Sonho'
                     : widget.type == EntryType.insight
                     ? 'Novo Insight'
-                    : 'Nova Emoção')
+                    : widget.type == EntryType.therapy
+                    ? 'Nova Sessão'
+                    : 'Novo Humor')
               : (widget.type == EntryType.dream
                     ? 'Editar Sonho'
                     : widget.type == EntryType.insight
                     ? 'Editar Insight'
+                    : widget.type == EntryType.therapy
+                    ? 'Editar Sessão'
                     : 'Editar Emoção'),
         ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        // In dark mode, background is the gradient (dark) -> want White text
+        // In light mode, background is the scaffold (light) -> want onSurface (dark) text
+        foregroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : Theme.of(context).colorScheme.onSurface,
         actions: [
           TextButton(
             onPressed: _save,
-            child: const Text(
+            child: Text(
               'SALVAR',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.primary,
+              ),
             ),
           ),
         ],
       ),
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
       body: BackgroundWrapper(
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            kToolbarHeight + MediaQuery.of(context).padding.top + 16,
+            16,
+            16,
+          ),
           children: [
             // Row removed (now in AppBar)
 
-            // Title Field for all
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: _titleLabel,
-                border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.title),
+            // Title Field for all EXCEPT Therapy
+            if (widget.type != EntryType.therapy) ...[
+              TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  labelText: _titleLabel,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.title),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
             // Dream Specific Fields
             if (widget.type == EntryType.dream) ...[
@@ -252,6 +286,20 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               ),
             ),
             const SizedBox(height: 16),
+
+            if (widget.type == EntryType.therapy) ...[
+              TextField(
+                controller: _keyLessonController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'O que mais te fez refletir dessa vez?',
+                  hintText: 'O que você quer lembrar dessa sessão?',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.star_border),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             if (widget.type == EntryType.dream) ...[
               TextField(

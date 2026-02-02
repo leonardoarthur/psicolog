@@ -26,11 +26,41 @@ class DailyMoodSelector extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildMoodEmoji(context, 1, '😢', currentMood),
-                  _buildMoodEmoji(context, 2, '😕', currentMood),
-                  _buildMoodEmoji(context, 3, '😐', currentMood),
-                  _buildMoodEmoji(context, 4, '🙂', currentMood),
-                  _buildMoodEmoji(context, 5, '😄', currentMood),
+                  _buildMoodEmoji(
+                    context,
+                    1,
+                    Icons.sentiment_very_dissatisfied,
+                    Colors.redAccent,
+                    currentMood,
+                  ),
+                  _buildMoodEmoji(
+                    context,
+                    2,
+                    Icons.sentiment_dissatisfied,
+                    Colors.orangeAccent,
+                    currentMood,
+                  ),
+                  _buildMoodEmoji(
+                    context,
+                    3,
+                    Icons.sentiment_neutral,
+                    Colors.amber,
+                    currentMood,
+                  ),
+                  _buildMoodEmoji(
+                    context,
+                    4,
+                    Icons.sentiment_satisfied,
+                    Colors.lightGreen,
+                    currentMood,
+                  ),
+                  _buildMoodEmoji(
+                    context,
+                    5,
+                    Icons.sentiment_very_satisfied,
+                    Colors.green,
+                    currentMood,
+                  ),
                 ],
               ),
             ],
@@ -43,7 +73,8 @@ class DailyMoodSelector extends StatelessWidget {
   Widget _buildMoodEmoji(
     BuildContext context,
     int value,
-    String emoji,
+    IconData icon,
+    Color color,
     int? currentMood,
   ) {
     final isSelected = currentMood == value;
@@ -58,8 +89,12 @@ class DailyMoodSelector extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOutBack,
         child: Opacity(
-          opacity: isSelected ? 1.0 : (isAnySelected ? 0.3 : 0.7),
-          child: Text(emoji, style: const TextStyle(fontSize: 32)),
+          opacity: isSelected ? 1.0 : (isAnySelected ? 0.3 : 1.0),
+          child: Icon(
+            icon,
+            size: 32,
+            color: isSelected || !isAnySelected ? color : Colors.grey,
+          ),
         ),
       ),
     );

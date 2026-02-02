@@ -38,7 +38,7 @@ class AppTheme {
       onSurface: Color(0xFFE2E8F0),
       surfaceContainerHighest: Color(0xFF2D2D44), // Slightly lighter for cards
     ),
-    scaffoldBackgroundColor: Color(0xFF0F0F1A), // Deepest Void
+    scaffoldBackgroundColor: const Color(0xFF0F0F1A), // Deepest Void
     textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
     appBarTheme: const AppBarTheme(
       centerTitle: true,
