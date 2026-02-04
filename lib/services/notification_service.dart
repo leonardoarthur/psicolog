@@ -38,8 +38,9 @@ class NotificationService {
         // Handle notification tap
       },
     );
+  }
 
-    // Request permissions
+  Future<void> requestPermissions() async {
     final androidImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -60,18 +61,21 @@ class NotificationService {
     // ID 1 for Therapy
     await flutterLocalNotificationsPlugin.cancel(id: 1);
 
+    final scheduledDate = _nextInstanceOfDayTime(dayOfWeek, hour, minute);
+
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id: 1,
       title: 'Como foi a terapia?',
       body: 'Registre seus insights enquanto estão frescos.',
-      scheduledDate: _nextInstanceOfDayTime(dayOfWeek, hour, minute),
+      scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          'therapy_channel',
-          'Lembretes de Terapia',
+          'therapy_channel_v2', // Changed ID to force update
+          'Lembretes de Terapia (Atualizado)',
           channelDescription: 'Notificações para registrar sessão de terapia',
-          importance: Importance.high,
+          importance: Importance.max, // Escalate to Max
           priority: Priority.high,
+          fullScreenIntent: true, // Try to be very aggressive for visibility
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

@@ -179,6 +179,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _therapyTime = pickedTime;
     });
 
+    // Request permissions first (UX improvement)
+    await NotificationService().requestPermissions();
+
     // Schedule
     await NotificationService().scheduleWeeklyTherapyNotification(
       dayOfWeek: pickedDay,
