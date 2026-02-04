@@ -7,6 +7,9 @@ import '../../data/models/entry.dart';
 import 'mood_calendar_screen.dart';
 import '../widgets/entry_form.dart';
 import 'settings_screen.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../animations/bouncing_button.dart';
+import '../animations/skeleton_loader.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -17,132 +20,161 @@ class JournalScreen extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            // DailyCheckInWidget removed from here
-            Expanded(
-              child: Consumer<JournalProvider>(
-                builder: (context, provider, child) {
-                  final entries = provider.entries
-                      .where((e) => e.type != EntryType.therapy)
-                      .toList();
-                  if (entries.isEmpty) {
-                    return const Center(
+        child: Consumer<JournalProvider>(
+          builder: (context, provider, child) {
+            final entries = provider.entries
+                .where((e) => e.type != EntryType.therapy)
+                .toList();
+
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                _buildSliverHeader(context),
+                if (entries.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.book_outlined,
-                            size: 64,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 16),
+                                Icons.book_outlined,
+                                size: 64,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.outlineVariant,
+                              )
+                              .animate(onPlay: (c) => c.repeat(reverse: true))
+                              .scale(
+                                begin: const Offset(1, 1),
+                                end: const Offset(1.1, 1.1),
+                                duration: 2000.ms,
+                              ),
+                          const SizedBox(height: 16),
                           Text(
                             'Seu diário está vazio.',
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                           ),
                         ],
-                      ),
-                    );
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.only(top: 16, bottom: 80),
-                    itemCount: entries.length,
-                    itemBuilder: (context, index) {
+                      ).animate().fadeIn(duration: 600.ms),
+                    ),
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
                       final entry = entries[index];
-                      return _EntryCard(entry: entry);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+                      // Staggered animation
+                      return _EntryCard(entry: entry)
+                          .animate()
+                          .fadeIn(duration: 500.ms, delay: (50 * index).ms)
+                          .slideY(
+                            begin: 0.2,
+                            end: 0,
+                            curve: Curves.easeOutQuad,
+                          );
+                    }, childCount: entries.length),
+                  ),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 80)),
+              ],
+            );
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddMenu(context),
-        child: const Icon(Icons.add),
+      floatingActionButton: BouncingButton(
+        onTap: () => _showAddMenu(context),
+        child: FloatingActionButton(
+          onPressed: () => _showAddMenu(
+            context,
+          ), // Handled by BouncingButton but FAB requires param. We can pass null or keep it. BouncingButton calls onTap.
+          elevation: 0, // Let BouncingButton handle feel
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildSliverHeader(BuildContext context) {
     final now = DateTime.now();
-    // Format: "Segunda, 12 Out"
-    final dayName = DateFormat(
-      'EEEE',
-      'pt_BR',
-    ).format(now).split('-')[0]; // Remove -feira
+    final dayName = DateFormat('EEEE', 'pt_BR').format(now).split('-')[0];
     final dayNum = DateFormat('d', 'pt_BR').format(now);
     final month = DateFormat('MMM', 'pt_BR').format(now);
     final dateStr =
         '${dayName[0].toUpperCase()}${dayName.substring(1)}, $dayNum ${month[0].toUpperCase()}${month.substring(1)}';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            dateStr,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+    return SliverAppBar(
+      backgroundColor: Colors.transparent, // Glass effect via theme usually
+      floating: true,
+      pinned: false,
+      snap: true,
+      elevation: 0,
+      expandedHeight: 100, // Reduced height for cleaner look
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+        title: Text(
+          dateStr,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 20, // Slightly smaller for AppBar title
           ),
-          Row(
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MoodCalendarScreen(),
-                    ),
-                  );
-                },
-                icon: Icon(
-                  Icons.calendar_month,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CatharsisScreen(),
-                    ),
-                  );
-                },
-                icon: Icon(
-                  Icons.local_fire_department,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(
-                        databaseService: context
-                            .read<JournalProvider>()
-                            .databaseService,
-                      ),
-                    ),
-                  );
-                },
-                icon: Icon(
-                  Icons.settings,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
+        background: Container(
+          color: Colors.transparent,
+        ), // Gradient could go here
       ),
+      actions: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MoodCalendarScreen(),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.calendar_month,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CatharsisScreen(),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.local_fire_department,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsScreen(
+                      databaseService: context
+                          .read<JournalProvider>()
+                          .databaseService,
+                    ),
+                  ),
+                );
+              },
+              icon: Icon(
+                Icons.settings,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -397,7 +429,10 @@ class _EntryCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(entry.wakeUpMood!, style: const TextStyle(fontSize: 16)),
+                    Text(
+                      entry.wakeUpMood!,
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ],
 
                   if (entry.dreamAssociations != null &&

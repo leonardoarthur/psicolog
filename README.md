@@ -1,114 +1,122 @@
 # PsicoLog 🧠✨
 
-**PsicoLog** is a modern, privacy-focused mental health companion app built with Flutter. It mimics a digital sanctuary where users can record their dreams, daily insights, and emotions in a secure, local-first environment.
+**PsicoLog** é um companheiro de saúde mental moderno, focado em privacidade, construído com Flutter. Ele funciona como um santuário digital onde usuários podem registrar seus sonhos, insights diários e emoções em um ambiente seguro e _local-first_.
 
-Designed with a premium "Glassmorphism" aesthetic, it prioritizes user experience through fluid animations and a calming interface.
+Projetado com uma estética premium "Glassbiometria" (Glassmorphism), ele prioriza a experiência do usuário através de animações fluidas, micro-interações e uma interface calmante.
 
 ---
 
-## 🚀 Key Features
+## 🚀 Funcionalidades Principais
 
 ### 1. Diário (Journal) 📔
-The core of PsicoLog. Users can create different types of entries:
-- **Dreams**: Record sleep experiences with specific tags (e.g., #Lucid, #Nightmare) and "Wake Up Mood".
-- **Insights**: Capture sudden realizations or ideas.
-- **Emotions**: Track emotional intensity (1-5) and context.
-- **Privacy**: All data is stored locally using **Isar Database**, ensuring your thoughts remain yours.
+O coração do PsicoLog. Usuários criam diferentes tipos de entradas:
+- **Sonhos**: Registre experiências oníricas com tags específicas (ex: #Lucido, #Pesadelo) e humor ao acordar.
+- **Insights**: Capture realizações súbitas ou ideias.
+- **Emoções**: Rastreie a intensidade emocional (1-5) e o contexto do dia.
+- **Privacidade**: Todo dado é salvo localmente usando **Isar Database**.
 
 ### 2. Catarse (Catharsis) 🌬️
-A unique feature designed to help users "let go" of intrusive thoughts.
-- Users type their worries or stressors.
-- Upon releasing, the text visually "evaporates" (using complex animations), symbolizing the act of letting go.
-- **Ephemeral**: These entries are *not* saved to the database, reinforcing the concept of release.
+Uma funcionalidade única desenhada para ajudar usuários a "deixar ir" pensamentos intrusivos.
+- O usuário digita suas preocupações ou estressores.
+- Ao confirmar, o texto "evapora" visualmente (usando animações complexas de partículas), simbolizando o ato de soltar.
+- **Efêmero**: Estas entradas **não** são salvas no banco de dados.
 
-### 3. Sonhos (Dream Journal) 🌙
-A dedicated view for your dream patterns.
-- Visualize frequency of dreams.
-- Filter by tags.
-- Analyze "Dream Associations" and identify recurring symbols.
+### 3. Ecos (Echoes) 🔊
+Ferramenta de análise inteligente.
+- Analisa padrões nos textos do seu diário.
+- Identifica palavras-chave e sentimentos recorrentes.
+- Fornece feedback visual sobre temas comuns na sua vida.
 
-### 4. Ecos (Echoes) 🔊
-(Feature in development)
-- Analyzes patterns in your journaling.
-- Provides feedback or "echoes" of your own thoughts to help with self-reflection.
+### 4. Segurança & Privacidade 🔒
+- **Bloqueio Biométrico**: Proteja seu diário usando a impressão digital ou FaceID do seu dispositivo.
+- **Backup & Restauração**: Exporte seus dados para um arquivo JSON seguro e restaure quando quiser. Nada de nuvem obrigatória.
 
-### 5. Mood Heatmap 📅
-- A Github-style contribution graph for your emotions.
-- Visualize low and high energy days at a glance.
-
----
-
-## 🛠️ Technology Stack
-
-This project leverages modern Flutter capabilities and packages:
-
-- **Framework**: [Flutter](https://flutter.dev) (Dart)
-- **State Management**: [Provider](https://pub.dev/packages/provider) for clean, scoped state access.
-- **Database**: [Isar](https://isar.dev) - Extremely fast, ACID-compliant local database.
-- **UI/Animations**:
-    - [flutter_animate](https://pub.dev/packages/flutter_animate) for declarative animations.
-    - [flutter_heatmap_calendar](https://pub.dev/packages/flutter_heatmap_calendar) for the mood tracker.
-    - [google_fonts](https://pub.dev/packages/google_fonts) for typography.
-- **Utilities**: `intl`, `path_provider`.
+### 5. Bem-Estar & Notificações 📅
+- **Lembrete de Terapia**: Configure notificações semanais para não esquecer de registrar seus insights pós-sessão.
+- **Mood Heatmap**: Um gráfico estilo GitHub para visualizar seus dias de alta e baixa energia emocional.
 
 ---
 
-## 📂 Project Structure
+## 🛠️ Stack Tecnológica
 
-The project follows a clean architecture pattern:
+Este projeto utiliza o que há de mais moderno no ecossistema Flutter:
+
+- **Framework**: [Flutter](https://flutter.dev) (Dart 3)
+- **Gerenciamento de Estado**: [Provider](https://pub.dev/packages/provider) para acesso limpo e escopado.
+- **Banco de Dados**: [Isar](https://isar.dev) - Banco NoSQL local extremamente rápido e ACID-compliant.
+- **Segurança**:
+    - `local_auth` para biometria.
+    - Sistema de backup criptografado (JSON).
+- **UI/Animações**:
+    - `flutter_animate` para animações declarativas.
+    - `flutter_heatmap_calendar` para o rastreador de humor.
+    - `google_fonts` para tipografia.
+    - `flutter_local_notifications` para agendamento local.
+
+---
+
+## 📂 Estrutura do Projeto
+
+O projeto segue um padrão de arquitetura limpa e segregada:
 
 ```
 lib/
-├── data/           # Data layer
-│   └── models/     # Isar entities (Entry, Dream, etc.)
-├── logic/          # Business logic
-│   └── providers/  # State management (JournalProvider, etc.)
-├── ui/             # Presentation layer
-│   ├── screens/    # Full page widgets (Journal, Catharsis, Home)
-│   ├── widgets/    # Reusable components (EntryCard, EntryForm)
-│   └── app_theme.dart # centralized theme configuration
-└── utils/          # Helpers and extensions
+├── data/           # Camada de Dados
+│   ├── models/     # Entidades Isar (Entry, AppSettings)
+│   └── services/   # Serviços de dados (DatabaseService - Isar)
+├── logic/          # Lógica de Negócio
+│   ├── providers/  # Gerenciamento de Estado (JournalProvider, EchoesProvider)
+│   └── services/   # Serviços de Lógica (AuthService, BackupService, NotificationService)
+├── ui/             # Camada de Apresentação
+│   ├── screens/    # Telas completas (Home, Settings, Dreams, LockScreen)
+│   ├── widgets/    # Componentes reutilizáveis (EntryCard, GlassContainer)
+│   └── app_theme.dart # Configuração centralizada de tema
+└── services/       # Serviços globais/core (ex: NotificationService)
 ```
 
-## ⚡ Getting Started
+---
 
-### Prerequisites
+## ⚡ Como Rodar o Projeto
+
+### Pré-requisitos
 - Flutter SDK (3.10+)
 - Dart SDK
+- Android Studio / VS Code configurados
 
-### Installation
+### Instalação
 
-1. **Clone the repository**
+1. **Clone o repositório**
    ```bash
-   git clone https://github.com/yourusername/psicolog.git
+   git clone https://github.com/seu-usuario/psicolog.git
    cd psicolog
    ```
 
-2. **Install Dependencies**
+2. **Instale as Dependências**
    ```bash
    flutter pub get
    ```
 
-3. **Run Code Generation (for Isar)**
-   Since we use Isar, you need to generate the adapter code:
+3. **Gere os Adaptadores do Banco (Isar)**
+   Como usamos Isar, é necessário gerar código:
    ```bash
    dart run build_runner build
    ```
 
-4. **Run the App**
+4. **Rode o App**
    ```bash
    flutter run
    ```
 
 ---
 
-## 🎨 Design Philosophy
+## 🎨 Filosofia de Design
 
-PsicoLog uses a **Dark/Glass** aesthetic:
-- **Colors**: Deep purples, teals, and dark greys (`Colors.grey.shade900`, `Colors.deepPurple`).
-- **Typography**: Clean, sans-serif fonts for readability.
-- **Motion**: Everything should feel "alive" but not overwhelming. Lists cascade in, buttons pulse gently, and interactions have immediate feedback.
+PsicoLog usa uma estética **Dark/Glass**:
+- **Cores**: Roxos profundos, verde-azulado (Teal) e cinzas escuros.
+- **Tipografia**: Fontes limpas e sem serifa para máxima legibilidade.
+- **Movimento**: Tudo deve parecer "vivo". Listas entram em cascata, botões pulam suavemente, e interações têm feedback imediato.
 
 ---
 
-*Verified locally on Linux/Android.*
+## 📄 Licença
+Este projeto está sob a licença MIT - sinta-se livre para usar e modificar.

@@ -21,7 +21,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // [ACTION REQUIRED] Change this to your unique Application ID (e.g., com.yourname.psicolog)
+        // This ID must be unique on the Play Store.
         applicationId = "com.example.psicolog"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -33,8 +34,13 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // [ACTION REQUIRED] Configure your signing keys here.
+            // You need to generate a keystore file and configure it in android/key.properties
+            // See: https://docs.flutter.dev/deployment/android#signing-the-app
+            // signingConfig = signingConfigs.getByName("release") 
+             
+             // For now, using debug keys to allow 'flutter run --release' to work without setup.
+             // DO NOT PUBLISH WITH DEBUG KEYS.
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = true
             isShrinkResources = true

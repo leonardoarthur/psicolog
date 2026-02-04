@@ -6,6 +6,8 @@ import '../../data/models/entry.dart';
 import '../../data/models/app_settings.dart';
 import '../widgets/entry_form.dart';
 import '../widgets/expandable_dream_text.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../animations/bouncing_button.dart';
 
 class DreamsScreen extends StatelessWidget {
   const DreamsScreen({super.key});

@@ -14,25 +14,20 @@ class NotificationService {
   Future<void> init() async {
     try {
       tz.initializeTimeZones();
-      // Handle potential type mismatch or failure defensively
       final dynamic localTimezoneParams =
           await FlutterTimezone.getLocalTimezone();
       final String timeZoneName = localTimezoneParams.toString();
       tz.setLocalLocation(tz.getLocation(timeZoneName));
     } catch (e) {
-      // Fallback if detection fails
       try {
         tz.setLocalLocation(tz.getLocation('America/Sao_Paulo'));
       } catch (_) {
-        // If even that fails, default is UTC which is safe enough for basic usage
-        // or we could set it to the first available location.
+        // Default to UTC
       }
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    // Note: iOS permissions not handled here for brevity, assuming Android focus based on logs.
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
@@ -44,7 +39,7 @@ class NotificationService {
       },
     );
 
-    // Request permissions for Android 13+
+    // Request permissions
     final androidImplementation = flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
@@ -52,6 +47,8 @@ class NotificationService {
 
     if (androidImplementation != null) {
       await androidImplementation.requestNotificationsPermission();
+      // Explicitly request exact alarms permission for Android 12+ (API 31+)
+      await androidImplementation.requestExactAlarmsPermission();
     }
   }
 
