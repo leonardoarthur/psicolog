@@ -9,7 +9,7 @@ import '../widgets/entry_form.dart';
 import 'settings_screen.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../animations/bouncing_button.dart';
-import '../animations/skeleton_loader.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class JournalScreen extends StatelessWidget {
   const JournalScreen({super.key});
@@ -51,7 +51,7 @@ class JournalScreen extends StatelessWidget {
                               ),
                           const SizedBox(height: 16),
                           Text(
-                            'Seu diário está vazio.',
+                            AppLocalizations.of(context)!.journalEmpty,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.outline,
                             ),
@@ -96,9 +96,10 @@ class JournalScreen extends StatelessWidget {
 
   Widget _buildSliverHeader(BuildContext context) {
     final now = DateTime.now();
-    final dayName = DateFormat('EEEE', 'pt_BR').format(now).split('-')[0];
-    final dayNum = DateFormat('d', 'pt_BR').format(now);
-    final month = DateFormat('MMM', 'pt_BR').format(now);
+    final locale = Localizations.localeOf(context).toString();
+    final dayName = DateFormat('EEEE', locale).format(now).split('-')[0];
+    final dayNum = DateFormat('d', locale).format(now);
+    final month = DateFormat('MMM', locale).format(now);
     final dateStr =
         '${dayName[0].toUpperCase()}${dayName.substring(1)}, $dayNum ${month[0].toUpperCase()}${month.substring(1)}';
 
@@ -185,6 +186,7 @@ class JournalScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
@@ -195,8 +197,8 @@ class JournalScreen extends StatelessWidget {
                   Icons.nights_stay,
                   color: Colors.deepPurple,
                 ),
-                title: const Text('Registrar Sonho'),
-                subtitle: const Text('O que você sonhou essa noite?'),
+                title: Text(l10n.registerDream),
+                subtitle: Text(l10n.dreamSubtitle),
                 onTap: () {
                   Navigator.pop(context);
                   _showEntryForm(context, EntryType.dream);
@@ -204,8 +206,8 @@ class JournalScreen extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.lightbulb, color: Colors.amber),
-                title: const Text('Novo Insight'),
-                subtitle: const Text('Uma ideia ou percepção.'),
+                title: Text(l10n.newInsight),
+                subtitle: Text(l10n.insightSubtitle),
                 onTap: () {
                   Navigator.pop(context);
                   _showEntryForm(context, EntryType.insight);
@@ -296,7 +298,7 @@ class _EntryCard extends StatelessWidget {
                         ],
                         Flexible(
                           child: Text(
-                            entry.title ?? _itemTypeTitle(entry.type),
+                            entry.title ?? _itemTypeTitle(context, entry.type),
                             style: Theme.of(context).textTheme.titleMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.bold,
@@ -393,7 +395,7 @@ class _EntryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    entry.title ?? _itemTypeTitle(entry.type),
+                    entry.title ?? _itemTypeTitle(context, entry.type),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -402,7 +404,7 @@ class _EntryCard extends StatelessWidget {
                   Text(
                     DateFormat(
                       'dd MMM yyyy, HH:mm',
-                      'pt_BR',
+                      Localizations.localeOf(context).toString(),
                     ).format(entry.timestamp),
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
@@ -422,9 +424,9 @@ class _EntryCard extends StatelessWidget {
                     const SizedBox(height: 20),
                     const Divider(),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Humor ao acordar',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.wakeUpMood,
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.bold,
                       ),
@@ -438,9 +440,9 @@ class _EntryCard extends StatelessWidget {
                   if (entry.dreamAssociations != null &&
                       entry.dreamAssociations!.isNotEmpty) ...[
                     const SizedBox(height: 16),
-                    const Text(
-                      'Associações',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.associations,
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontWeight: FontWeight.bold,
                       ),
@@ -480,6 +482,7 @@ class _EntryCard extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       builder: (ctx) {
+        final l10n = AppLocalizations.of(context)!;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -488,7 +491,7 @@ class _EntryCard extends StatelessWidget {
                 leading: Icon(
                   entry.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
                 ),
-                title: Text(entry.isPinned ? 'Desafixar' : 'Fixar'),
+                title: Text(entry.isPinned ? l10n.unpin : l10n.pin),
                 onTap: () {
                   Navigator.pop(ctx);
                   context.read<JournalProvider>().togglePin(entry);
@@ -496,7 +499,7 @@ class _EntryCard extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.edit),
-                title: const Text('Editar'),
+                title: Text(l10n.edit),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showEntryFormWithEntry(context, entry);
@@ -504,9 +507,9 @@ class _EntryCard extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Excluir',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  l10n.delete,
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -534,38 +537,40 @@ class _EntryCard extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Excluir entrada?'),
-        content: const Text('Essa ação não pode ser desfeita.'),
+        title: Text(l10n.deleteEntryTitle),
+        content: Text(l10n.deleteEntryContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCELAR'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx); // Close dialog
               context.read<JournalProvider>().deleteEntry(entry.id);
             },
-            child: const Text('EXCLUIR', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  String _itemTypeTitle(EntryType type) {
+  String _itemTypeTitle(BuildContext context, EntryType type) {
+    final l10n = AppLocalizations.of(context)!;
     switch (type) {
       case EntryType.dream:
-        return 'Sonho';
+        return l10n.dream;
       case EntryType.insight:
-        return 'Insight';
+        return l10n.insight;
       case EntryType.emotion:
-        return 'Emoção';
+        return l10n.emotion;
       case EntryType.therapy:
-        return 'Terapia';
+        return l10n.therapy;
     }
   }
 }

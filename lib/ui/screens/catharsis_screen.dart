@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class CatharsisScreen extends StatefulWidget {
   const CatharsisScreen({super.key});
@@ -22,22 +23,24 @@ class _CatharsisScreenState extends State<CatharsisScreen> {
     // Wait for animation
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         _controller.clear();
         setState(() {
           _isLiberating = false;
         });
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Pensamento liberado.')));
+        ).showSnackBar(SnackBar(content: Text(l10n.thoughtLiberated)));
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(title: const Text('Catarse')),
+      appBar: AppBar(title: Text(l10n.catharsisTitle)),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -52,9 +55,9 @@ class _CatharsisScreenState extends State<CatharsisScreen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            const Text(
-              'Escreva o que te aflige. Ao liberar, desaparecerá para sempre.',
-              style: TextStyle(fontStyle: FontStyle.italic),
+            Text(
+              l10n.catharsisInstruction,
+              style: const TextStyle(fontStyle: FontStyle.italic),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -83,8 +86,8 @@ class _CatharsisScreenState extends State<CatharsisScreen> {
                   maxLines: null,
                   expands: true,
                   style: Theme.of(context).textTheme.bodyLarge,
-                  decoration: const InputDecoration(
-                    hintText: 'Digite aqui...',
+                  decoration: InputDecoration(
+                    hintText: l10n.typeHere,
                     border: InputBorder.none,
                   ),
                 ),
@@ -94,7 +97,7 @@ class _CatharsisScreenState extends State<CatharsisScreen> {
             FilledButton.icon(
               onPressed: _liberate,
               icon: const Icon(Icons.air),
-              label: const Text('Liberar Pensamento'),
+              label: Text(l10n.liberateThought),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
               ),

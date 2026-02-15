@@ -13,7 +13,10 @@ class AppSettings {
 
   int? therapyDayOfWeek; // 1=Mon, 7=Sun
   int? therapyHour;
+
   int? therapyMinute;
+
+  bool isDarkMode = true;
 
   // Singleton pattern helper for Isar
   static Future<AppSettings> get(Isar isar) async {

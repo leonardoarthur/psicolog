@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import '../widgets/background_wrapper.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class EntryFormWidget extends StatefulWidget {
   final EntryType type;
@@ -59,13 +60,15 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     // If dream, content can be empty if title is present? Or vice versa.
     // Plan: Title optional. Content required? Maybe allow empty description if tags present?
     // Let's enforce some content or title.
     if (_contentController.text.isEmpty && _titleController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Escreva algo para salvar.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.writeSomethingToSave),
+        ),
       );
       return;
     }
@@ -94,33 +97,37 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
       entry.therapyKeyLesson = _keyLessonController.text;
     }
 
-    context.read<JournalProvider>().addEntry(entry);
-    Navigator.pop(context);
-  }
-
-  String get _titleLabel {
-    switch (widget.type) {
-      case EntryType.dream:
-        return 'Nome do Sonho (Opcional)';
-      case EntryType.insight:
-        return 'Título do Insight';
-      case EntryType.emotion:
-        return 'Humor';
-      case EntryType.therapy:
-        return 'Título da Sessão (Opcional)';
+    await context.read<JournalProvider>().addEntry(entry);
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 
-  String get _contentLabel {
+  String _titleLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (widget.type) {
       case EntryType.dream:
-        return 'Relato do sonho...';
+        return l10n.dreamTitleHint;
       case EntryType.insight:
-        return 'Descreva seu insight...';
+        return l10n.insightTitleHint;
       case EntryType.emotion:
-        return 'Observação sobre o dia (opcional)';
+        return l10n.emotionTitleHint;
       case EntryType.therapy:
-        return 'Fale um pouco sobre a sessão...';
+        return l10n.therapyTitleHint;
+    }
+  }
+
+  String _contentLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (widget.type) {
+      case EntryType.dream:
+        return l10n.dreamContentHint;
+      case EntryType.insight:
+        return l10n.insightContentHint;
+      case EntryType.emotion:
+        return l10n.emotionContentHint;
+      case EntryType.therapy:
+        return l10n.therapyContentHint;
     }
   }
 
@@ -133,19 +140,19 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
         title: Text(
           widget.entryToEdit == null
               ? (widget.type == EntryType.dream
-                    ? 'Novo Sonho'
+                    ? AppLocalizations.of(context)!.newDream
                     : widget.type == EntryType.insight
-                    ? 'Novo Insight'
+                    ? AppLocalizations.of(context)!.newInsight
                     : widget.type == EntryType.therapy
-                    ? 'Nova Sessão'
-                    : 'Novo Humor')
+                    ? AppLocalizations.of(context)!.newTherapy
+                    : AppLocalizations.of(context)!.newEmotion)
               : (widget.type == EntryType.dream
-                    ? 'Editar Sonho'
+                    ? AppLocalizations.of(context)!.editDream
                     : widget.type == EntryType.insight
-                    ? 'Editar Insight'
+                    ? AppLocalizations.of(context)!.editInsight
                     : widget.type == EntryType.therapy
-                    ? 'Editar Sessão'
-                    : 'Editar Emoção'),
+                    ? AppLocalizations.of(context)!.editTherapy
+                    : AppLocalizations.of(context)!.editEmotion),
         ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -159,7 +166,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
           TextButton(
             onPressed: _save,
             child: Text(
-              'SALVAR',
+              AppLocalizations.of(context)!.save.toUpperCase(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).brightness == Brightness.dark
@@ -188,7 +195,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(
-                  labelText: _titleLabel,
+                  labelText: _titleLabel(context),
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.title),
                 ),
@@ -196,10 +203,9 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               const SizedBox(height: 16),
             ],
 
-            // Dream Specific Fields
             if (widget.type == EntryType.dream) ...[
               Text(
-                'Como acordou?',
+                AppLocalizations.of(context)!.howDidYouWakeUp,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -212,21 +218,46 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
                       'Energizado',
                       'Assustado',
                       'Confuso',
-                    ].map((mood) {
-                      final isSelected = _selectedWakeUpMood == mood;
+                    ].map((moodKey) {
+                      final l10n = AppLocalizations.of(context)!;
+                      String label;
+                      switch (moodKey) {
+                        case 'Cansado':
+                          label = l10n.moodTired;
+                          break;
+                        case 'Bem':
+                          label = l10n.moodGood;
+                          break;
+                        case 'Energizado':
+                          label = l10n.moodEnergized;
+                          break;
+                        case 'Assustado':
+                          label = l10n.moodScared;
+                          break;
+                        case 'Confuso':
+                          label = l10n.moodConfused;
+                          break;
+                        default:
+                          label = moodKey;
+                      }
+
+                      final isSelected = _selectedWakeUpMood == moodKey;
                       return ChoiceChip(
-                        label: Text(mood),
+                        label: Text(label),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
-                            _selectedWakeUpMood = selected ? mood : null;
+                            _selectedWakeUpMood = selected ? moodKey : null;
                           });
                         },
                       );
                     }).toList(),
               ),
               const SizedBox(height: 16),
-              Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                AppLocalizations.of(context)!.tagsLabel,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -237,17 +268,39 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
                       'Recorrente',
                       'Fragmentado',
                       'Premonição',
-                    ].map((tag) {
-                      final isSelected = _selectedTags.contains(tag);
+                    ].map((tagKey) {
+                      final l10n = AppLocalizations.of(context)!;
+                      String label;
+                      switch (tagKey) {
+                        case 'Pesadelo':
+                          label = l10n.tagNightmare;
+                          break;
+                        case 'Lúcido':
+                          label = l10n.tagLucid;
+                          break;
+                        case 'Recorrente':
+                          label = l10n.tagRecurrent;
+                          break;
+                        case 'Fragmentado':
+                          label = l10n.tagFragmented;
+                          break;
+                        case 'Premonição':
+                          label = l10n.tagPremonition;
+                          break;
+                        default:
+                          label = tagKey;
+                      }
+
+                      final isSelected = _selectedTags.contains(tagKey);
                       return FilterChip(
-                        label: Text(tag),
+                        label: Text(label),
                         selected: isSelected,
                         onSelected: (selected) {
                           setState(() {
                             if (selected) {
-                              _selectedTags.add(tag);
+                              _selectedTags.add(tagKey);
                             } else {
-                              _selectedTags.remove(tag);
+                              _selectedTags.remove(tagKey);
                             }
                           });
                         },
@@ -260,7 +313,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
             // Emotion Specific Fields
             if (widget.type == EntryType.emotion) ...[
               Text(
-                'Como foi o dia? ${_intensity.round()}',
+                '${AppLocalizations.of(context)!.howWasYourDay} ${_intensity.round()}',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               Slider(
@@ -280,7 +333,7 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               controller: _contentController,
               maxLines: 6,
               decoration: InputDecoration(
-                labelText: _contentLabel,
+                labelText: _contentLabel(context),
                 border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
@@ -291,11 +344,11 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               TextField(
                 controller: _keyLessonController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'O que mais te fez refletir dessa vez?',
-                  hintText: 'O que você quer lembrar dessa sessão?',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.star_border),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.reflectionQuestion,
+                  hintText: AppLocalizations.of(context)!.reflectionHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.star_border),
                 ),
               ),
               const SizedBox(height: 16),
@@ -305,11 +358,11 @@ class _EntryFormWidgetState extends State<EntryFormWidget> {
               TextField(
                 controller: _associationsController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Associações / Resto Diurno',
-                  hintText: 'O que aconteceu ontem que pode ter puxado isso?',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.link),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.associationsLabel,
+                  hintText: AppLocalizations.of(context)!.associationsHint,
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.link),
                 ),
               ),
               const SizedBox(height: 16),

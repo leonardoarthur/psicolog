@@ -6,19 +6,19 @@ import '../../data/models/entry.dart';
 import '../../data/models/app_settings.dart';
 import '../widgets/entry_form.dart';
 import '../widgets/expandable_dream_text.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import '../animations/bouncing_button.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class DreamsScreen extends StatelessWidget {
   const DreamsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     // Determine greeting
     final hour = DateTime.now().hour;
-    String greeting = 'Bom dia';
-    if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
-    if (hour >= 18) greeting = 'Boa noite';
+    String greeting = l10n.goodMorning;
+    if (hour >= 12 && hour < 18) greeting = l10n.goodAfternoon;
+    if (hour >= 18) greeting = l10n.goodEvening;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -36,7 +36,7 @@ class DreamsScreen extends StatelessWidget {
                         .databaseService
                         .getAppSettings(), // Access cached usage or just fetch
                     builder: (context, snapshot) {
-                      final name = snapshot.data?.userName ?? 'Visitante';
+                      final name = snapshot.data?.userName ?? l10n.visitor;
                       return Text(
                         '$greeting, $name',
                         style: Theme.of(context).textTheme.headlineMedium
@@ -49,7 +49,7 @@ class DreamsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pronto para registrar seus sonhos?',
+                    l10n.dreamPrompt,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -71,7 +71,7 @@ class DreamsScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                     ),
                     icon: const Icon(Icons.nights_stay),
-                    label: const Text('GRAVAR SONHO AGORA'),
+                    label: Text(l10n.recordDreamNow),
                   ),
                 ],
               ),
@@ -98,7 +98,7 @@ class DreamsScreen extends StatelessWidget {
                             ).colorScheme.surfaceContainerHighest,
                           ),
                           const SizedBox(height: 16),
-                          const Text('Nenhum sonho registrado ainda.'),
+                          Text(l10n.noDreamsYet),
                         ],
                       ),
                     );
@@ -158,7 +158,10 @@ class _DreamTimelineItem extends StatelessWidget {
               Row(
                 children: [
                   Text(
-                    DateFormat('dd MMM, HH:mm').format(dream.timestamp),
+                    DateFormat(
+                      'dd MMM, HH:mm',
+                      Localizations.localeOf(context).toString(),
+                    ).format(dream.timestamp),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.outline,
                     ),

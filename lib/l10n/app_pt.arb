@@ -1,0 +1,165 @@
+{
+  "@@locale": "pt",
+  "appTitle": "PsicoLog",
+  "errorStartup": "Erro ao iniciar o aplicativo",
+  "visitor": "Visitante",
+  "confirm": "CONFIRMAR",
+  "cancel": "CANCELAR",
+  "delete": "EXCLUIR",
+  "edit": "Editar",
+  "save": "Salvar",
+
+  "journalEmpty": "Seu diário está vazio.",
+  "registerDream": "Registrar Sonho",
+  "dreamSubtitle": "O que você sonhou essa noite?",
+  "newInsight": "Novo Insight",
+  "insightSubtitle": "Uma ideia ou percepção.",
+  "dream": "Sonho",
+  "insight": "Insight",
+  "emotion": "Emoção",
+  "therapy": "Terapia",
+  "wakeUpMood": "Humor ao acordar",
+  "associations": "Associações",
+  "pin": "Fixar",
+  "unpin": "Desafixar",
+  "deleteEntryTitle": "Excluir entrada?",
+  "deleteEntryContent": "Essa ação não pode ser desfeita.",
+
+  "goodMorning": "Bom dia",
+  "goodAfternoon": "Boa tarde",
+  "goodEvening": "Boa noite",
+  "dreamPrompt": "Pronto para registrar seus sonhos?",
+  "recordDreamNow": "GRAVAR SONHO AGORA",
+  "noDreamsYet": "Nenhum sonho registrado ainda.",
+
+  "settingsTitle": "Configurações",
+  "therapySectionTitle": "Terapia e Bem-Estar",
+  "darkMode": "Modo Escuro",
+  "darkModeSubtitle": "Alternar tema do aplicativo",
+  "biometrics": "Bloqueio Biométrico",
+  "biometricsSubtitle": "Exigir autenticação ao abrir o app",
+  "exportData": "Exportar Dados",
+  "exportDataSubtitle": "Salvar backup em arquivo JSON",
+  "restoreData": "Restaurar Dados",
+  "restoreDataSubtitle": "Importar de arquivo JSON",
+  "therapySchedule": "Horário da Terapia",
+  "tapToConfigure": "Toque para configurar",
+  "testNotification": "Testar Notificação",
+  "testNotificationSubtitle": "Disparar notificação agora",
+  "checkSchedule": "Verificar Agendamentos",
+  "checkScheduleSubtitle": "Listar horários agendados",
+  "biometricsNotAvailable": "Biometria não disponível neste dispositivo.",
+  "backupSuccess": "Backup gerado com sucesso!",
+  "backupError": "Erro ao exportar: {error}",
+  "@backupError": {
+    "placeholders": {
+        "error": {
+            "type": "String"
+        }
+    }
+  },
+  "restoreSuccess": "Dados restaurados com sucesso! Reinicie o app.",
+  "restoreError": "Erro ao restaurar: {error}",
+  "@restoreError": {
+    "placeholders": {
+        "error": {
+            "type": "String"
+        }
+    }
+  },
+  "notificationSent": "Notificação de teste enviada!",
+  "noScheduleFound": "Nenhum agendamento encontrado.",
+  "schedulesFound": "Agendamentos: {count} pendentes",
+  "@schedulesFound": {
+    "placeholders": {
+        "count": {
+            "type": "int"
+        }
+    }
+  },
+  "therapyDayTitle": "Dia da Terapia",
+
+  "catharsisTitle": "Catarse",
+  "catharsisInstruction": "Escreva o que te aflige. Ao liberar, desaparecerá para sempre.",
+  "typeHere": "Digite aqui...",
+  "liberateThought": "Liberar Pensamento",
+  "thoughtLiberated": "Pensamento liberado.",
+
+  "monday": "Segunda-feira",
+  "tuesday": "Terça-feira",
+  "wednesday": "Quarta-feira",
+  "thursday": "Quinta-feira",
+  "friday": "Sexta-feira",
+  "saturday": "Sábado",
+  "sunday": "Domingo",
+  
+  "navDreams": "Sonhos",
+  "navJournal": "Diário",
+  "navTherapy": "Terapia",
+  "navEchoes": "Ecos",
+
+  "myTherapy": "Minha Terapia",
+  "noTherapyRecorded": "Nenhuma sessão registrada.",
+  "newSession": "Nova Sessão",
+  "reflection": "REFLEXÃO",
+  "deleteSessionTitle": "Excluir sessão?",
+  
+  "moodCalendarTitle": "Calendário Emocional",
+  "noRecordsOn": "Nenhum registro em {date}",
+  "@noRecordsOn": {
+    "placeholders": {
+        "date": {
+            "type": "String"
+        }
+    }
+  },
+  "untitled": "Sem título",
+
+  "echoesEmpty": "Escreva mais no seu diário para ver os significantes aparecerem aqui.",
+
+  "howWasYourDay": "Como foi seu dia?",
+  "writeSomethingToSave": "Escreva algo para salvar.",
+  
+  "dreamTitleHint": "Nome do Sonho (Opcional)",
+  "insightTitleHint": "Título do Insight",
+  "emotionTitleHint": "Humor",
+  "therapyTitleHint": "Título da Sessão (Opcional)",
+  
+  "dreamContentHint": "Relato do sonho...",
+  "insightContentHint": "Descreva seu insight...",
+  "emotionContentHint": "Observação sobre o dia (opcional)",
+  "therapyContentHint": "Fale um pouco sobre a sessão...",
+  
+  "newDream": "Novo Sonho",
+  "newInsight": "Novo Insight",
+  "newTherapy": "Nova Sessão",
+  "newEmotion": "Novo Humor",
+  
+  "editDream": "Editar Sonho",
+  "editInsight": "Editar Insight",
+  "editTherapy": "Editar Sessão",
+  "editEmotion": "Editar Emoção",
+  
+  "howDidYouWakeUp": "Como acordou?",
+  "moodTired": "Cansado",
+  "moodGood": "Bem",
+  "moodEnergized": "Energizado",
+  "moodScared": "Assustado",
+  "moodConfused": "Confuso",
+  
+  "tagsLabel": "Tags",
+  "tagNightmare": "Pesadelo",
+  "tagLucid": "Lúcido",
+  "tagRecurrent": "Recorrente",
+  "tagFragmented": "Fragmentado",
+  "tagPremonition": "Premonição",
+  
+  "reflectionQuestion": "O que mais te fez refletir dessa vez?",
+  "reflectionHint": "O que você quer lembrar dessa sessão?",
+  
+  "associationsLabel": "Associações / Resto Diurno",
+  "associationsHint": "O que aconteceu ontem que pode ter puxado isso?",
+  
+  "seeMore": "Ver mais",
+  "seeLess": "Ver menos"
+}

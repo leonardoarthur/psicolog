@@ -3,6 +3,9 @@ import '../../data/services/database_service.dart';
 import '../../logic/services/auth_service.dart';
 import '../../logic/services/backup_service.dart';
 import '../../services/notification_service.dart';
+import '../../logic/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   final DatabaseService databaseService;
@@ -50,11 +53,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final canCheck = await _authService.canCheckBiometrics();
       if (!canCheck) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Biometria não disponível neste dispositivo.'),
-            ),
-          );
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.biometricsNotAvailable)));
         }
         return;
       }
@@ -77,15 +79,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await _backupService.exportData();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Backup gerado com sucesso!')),
-        );
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.backupSuccess)));
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao exportar: $e')));
+        ).showSnackBar(SnackBar(content: Text(l10n.backupError(e.toString()))));
       }
     }
   }
@@ -94,61 +98,62 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       final success = await _backupService.restoreData();
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Dados restaurados com sucesso! Reinicie o app.'),
-            ),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.restoreSuccess)));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Restauração cancelada ou falha.')),
+            SnackBar(content: Text(l10n.restoreError('Cancelado/Falha'))),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao restaurar: $e')));
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.restoreError(e.toString()))),
+        );
       }
     }
   }
 
   Future<void> _updateTherapySchedule() async {
     // 1. Pick Day
+    final l10n = AppLocalizations.of(context)!;
     final int? pickedDay = await showDialog<int>(
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text('Dia da Terapia'),
+          title: Text(l10n.therapyDayTitle),
           children: [
             SimpleDialogOption(
-              child: const Text('Segunda-feira'),
+              child: Text(l10n.monday),
               onPressed: () => Navigator.pop(context, 1),
             ),
             SimpleDialogOption(
-              child: const Text('Terça-feira'),
+              child: Text(l10n.tuesday),
               onPressed: () => Navigator.pop(context, 2),
             ),
             SimpleDialogOption(
-              child: const Text('Quarta-feira'),
+              child: Text(l10n.wednesday),
               onPressed: () => Navigator.pop(context, 3),
             ),
             SimpleDialogOption(
-              child: const Text('Quinta-feira'),
+              child: Text(l10n.thursday),
               onPressed: () => Navigator.pop(context, 4),
             ),
             SimpleDialogOption(
-              child: const Text('Sexta-feira'),
+              child: Text(l10n.friday),
               onPressed: () => Navigator.pop(context, 5),
             ),
             SimpleDialogOption(
-              child: const Text('Sábado'),
+              child: Text(l10n.saturday),
               onPressed: () => Navigator.pop(context, 6),
             ),
             SimpleDialogOption(
-              child: const Text('Domingo'),
+              child: Text(l10n.sunday),
               onPressed: () => Navigator.pop(context, 7),
             ),
           ],
@@ -183,15 +188,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await NotificationService().requestPermissions();
 
     // Schedule
-    await NotificationService().scheduleWeeklyTherapyNotification(
-      dayOfWeek: pickedDay,
-      hour: pickedTime.hour,
-      minute: pickedTime.minute,
-    );
+    final scheduledInfo = await NotificationService()
+        .scheduleWeeklyTherapyNotification(
+          dayOfWeek: pickedDay,
+          hour: pickedTime.hour,
+          minute: pickedTime.minute,
+        );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Lembrete de terapia configurado!')),
+        SnackBar(content: Text('Agendado para: $scheduledInfo (delay de 30m)')),
       );
     }
   }
@@ -213,8 +219,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: AppBar(title: Text(l10n.settingsTitle)),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -222,8 +229,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildTherapySection(),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Bloqueio Biométrico'),
-                  subtitle: const Text('Exigir autenticação ao abrir o app'),
+                  title: Text(l10n.darkMode),
+                  subtitle: Text(l10n.darkModeSubtitle),
+                  value: context.watch<ThemeProvider>().isDarkMode,
+                  onChanged: (val) =>
+                      context.read<ThemeProvider>().toggleTheme(val),
+                  secondary: Icon(
+                    context.watch<ThemeProvider>().isDarkMode
+                        ? Icons.dark_mode
+                        : Icons.light_mode,
+                  ),
+                ),
+                const Divider(),
+                SwitchListTile(
+                  title: Text(l10n.biometrics),
+                  subtitle: Text(l10n.biometricsSubtitle),
                   value: _isBiometricEnabled,
                   onChanged: _toggleBiometrics,
                   secondary: const Icon(Icons.fingerprint),
@@ -231,14 +251,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.download),
-                  title: const Text('Exportar Dados'),
-                  subtitle: const Text('Salvar backup em arquivo JSON'),
+                  title: Text(l10n.exportData),
+                  subtitle: Text(l10n.exportDataSubtitle),
                   onTap: _exportData,
                 ),
                 ListTile(
                   leading: const Icon(Icons.restore),
-                  title: const Text('Restaurar Dados'),
-                  subtitle: const Text('Importar de arquivo JSON'),
+                  title: Text(l10n.restoreData),
+                  subtitle: Text(l10n.restoreDataSubtitle),
                   onTap: _restoreData,
                 ),
               ],
@@ -247,13 +267,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildTherapySection() {
-    String subtitle = 'Toque para configurar';
+    final l10n = AppLocalizations.of(context)!;
+    String subtitle = l10n.tapToConfigure;
     if (_therapyDay != null && _therapyTime != null) {
-      final days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+      final days = [
+        l10n.monday,
+        l10n.tuesday,
+        l10n.wednesday,
+        l10n.thursday,
+        l10n.friday,
+        l10n.saturday,
+        l10n.sunday,
+      ];
       final dayStr = days[_therapyDay! - 1]; // 1-based index
       final timeStr =
           "${_therapyTime!.hour.toString().padLeft(2, '0')}:${_therapyTime!.minute.toString().padLeft(2, '0')}";
-      subtitle = '$dayStr às $timeStr';
+      subtitle = '$dayStr - $timeStr';
     }
 
     return Column(
@@ -262,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Terapia e Bem-Estar',
+            l10n.therapySectionTitle,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -270,7 +299,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         ListTile(
           leading: const Icon(Icons.self_improvement, color: Colors.teal),
-          title: const Text('Horário da Terapia'),
+          title: Text(l10n.therapySchedule),
           subtitle: Text(subtitle),
           trailing: _therapyDay != null
               ? IconButton(
@@ -279,6 +308,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )
               : const Icon(Icons.chevron_right),
           onTap: _updateTherapySchedule,
+        ),
+        ListTile(
+          title: Text(l10n.testNotification),
+          subtitle: Text(l10n.testNotificationSubtitle),
+          leading: const Icon(Icons.notifications_active),
+          onTap: () async {
+            await NotificationService().showTestNotification();
+            if (mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.notificationSent)));
+            }
+          },
+        ),
+        ListTile(
+          title: Text(l10n.checkSchedule),
+          subtitle: Text(l10n.checkScheduleSubtitle),
+          leading: const Icon(Icons.playlist_add_check),
+          onTap: () async {
+            // Re-request permissions just in case
+            await NotificationService().requestPermissions();
+
+            final pending = await NotificationService()
+                .checkPendingNotifications();
+            if (mounted) {
+              if (pending.isEmpty) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(l10n.noScheduleFound)));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.schedulesFound(pending.length))),
+                );
+                // Also print to console for debugging if needed, but snackbar sufficient for user count
+              }
+            }
+          },
         ),
       ],
     );

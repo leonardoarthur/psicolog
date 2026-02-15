@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/providers/journal_provider.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class DailyMoodSelector extends StatelessWidget {
   const DailyMoodSelector({super.key});
@@ -17,7 +18,7 @@ class DailyMoodSelector extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Como foi seu dia?',
+                AppLocalizations.of(context)!.howWasYourDay,
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),

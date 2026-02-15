@@ -22,28 +22,33 @@ const AppSettingsSchema = CollectionSchema(
       name: r'isBiometricEnabled',
       type: IsarType.bool,
     ),
-    r'isOnboardingCompleted': PropertySchema(
+    r'isDarkMode': PropertySchema(
       id: 1,
+      name: r'isDarkMode',
+      type: IsarType.bool,
+    ),
+    r'isOnboardingCompleted': PropertySchema(
+      id: 2,
       name: r'isOnboardingCompleted',
       type: IsarType.bool,
     ),
     r'therapyDayOfWeek': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'therapyDayOfWeek',
       type: IsarType.long,
     ),
     r'therapyHour': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'therapyHour',
       type: IsarType.long,
     ),
     r'therapyMinute': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'therapyMinute',
       type: IsarType.long,
     ),
     r'userName': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'userName',
       type: IsarType.string,
     )
@@ -84,11 +89,12 @@ void _appSettingsSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.isBiometricEnabled);
-  writer.writeBool(offsets[1], object.isOnboardingCompleted);
-  writer.writeLong(offsets[2], object.therapyDayOfWeek);
-  writer.writeLong(offsets[3], object.therapyHour);
-  writer.writeLong(offsets[4], object.therapyMinute);
-  writer.writeString(offsets[5], object.userName);
+  writer.writeBool(offsets[1], object.isDarkMode);
+  writer.writeBool(offsets[2], object.isOnboardingCompleted);
+  writer.writeLong(offsets[3], object.therapyDayOfWeek);
+  writer.writeLong(offsets[4], object.therapyHour);
+  writer.writeLong(offsets[5], object.therapyMinute);
+  writer.writeString(offsets[6], object.userName);
 }
 
 AppSettings _appSettingsDeserialize(
@@ -100,11 +106,12 @@ AppSettings _appSettingsDeserialize(
   final object = AppSettings();
   object.id = id;
   object.isBiometricEnabled = reader.readBool(offsets[0]);
-  object.isOnboardingCompleted = reader.readBool(offsets[1]);
-  object.therapyDayOfWeek = reader.readLongOrNull(offsets[2]);
-  object.therapyHour = reader.readLongOrNull(offsets[3]);
-  object.therapyMinute = reader.readLongOrNull(offsets[4]);
-  object.userName = reader.readStringOrNull(offsets[5]);
+  object.isDarkMode = reader.readBool(offsets[1]);
+  object.isOnboardingCompleted = reader.readBool(offsets[2]);
+  object.therapyDayOfWeek = reader.readLongOrNull(offsets[3]);
+  object.therapyHour = reader.readLongOrNull(offsets[4]);
+  object.therapyMinute = reader.readLongOrNull(offsets[5]);
+  object.userName = reader.readStringOrNull(offsets[6]);
   return object;
 }
 
@@ -120,12 +127,14 @@ P _appSettingsDeserializeProp<P>(
     case 1:
       return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 3:
       return (reader.readLongOrNull(offset)) as P;
     case 4:
       return (reader.readLongOrNull(offset)) as P;
     case 5:
+      return (reader.readLongOrNull(offset)) as P;
+    case 6:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -283,6 +292,16 @@ extension AppSettingsQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isBiometricEnabled',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterFilterCondition>
+      isDarkModeEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDarkMode',
         value: value,
       ));
     });
@@ -696,6 +715,18 @@ extension AppSettingsQuerySortBy
     });
   }
 
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByIsDarkMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDarkMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> sortByIsDarkModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDarkMode', Sort.desc);
+    });
+  }
+
   QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
       sortByIsOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
@@ -790,6 +821,18 @@ extension AppSettingsQuerySortThenBy
     });
   }
 
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByIsDarkMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDarkMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppSettings, AppSettings, QAfterSortBy> thenByIsDarkModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDarkMode', Sort.desc);
+    });
+  }
+
   QueryBuilder<AppSettings, AppSettings, QAfterSortBy>
       thenByIsOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
@@ -865,6 +908,12 @@ extension AppSettingsQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AppSettings, AppSettings, QDistinct> distinctByIsDarkMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDarkMode');
+    });
+  }
+
   QueryBuilder<AppSettings, AppSettings, QDistinct>
       distinctByIsOnboardingCompleted() {
     return QueryBuilder.apply(this, (query) {
@@ -911,6 +960,12 @@ extension AppSettingsQueryProperty
       isBiometricEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isBiometricEnabled');
+    });
+  }
+
+  QueryBuilder<AppSettings, bool, QQueryOperations> isDarkModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDarkMode');
     });
   }
 

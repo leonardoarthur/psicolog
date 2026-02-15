@@ -6,6 +6,7 @@ import '../../data/models/entry.dart';
 import '../../logic/providers/journal_provider.dart';
 
 import '../widgets/daily_check_in.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class MoodCalendarScreen extends StatefulWidget {
   const MoodCalendarScreen({super.key});
@@ -21,7 +22,7 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendário Emocional'),
+        title: Text(AppLocalizations.of(context)!.moodCalendarTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -71,7 +72,12 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
     if (dayEntries.isEmpty) {
       return Center(
         child: Text(
-          'Nenhum registro em ${DateFormat('dd/MM').format(date)}',
+          AppLocalizations.of(context)!.noRecordsOn(
+            DateFormat(
+              'dd/MM',
+              Localizations.localeOf(context).toString(),
+            ).format(date),
+          ),
           style: const TextStyle(color: Colors.grey),
         ),
       );
@@ -86,7 +92,7 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
             leading: _getIconForType(entry.type),
-            title: Text(entry.title ?? 'Sem título'),
+            title: Text(entry.title ?? AppLocalizations.of(context)!.untitled),
             subtitle: Text(
               entry.content,
               maxLines: 2,

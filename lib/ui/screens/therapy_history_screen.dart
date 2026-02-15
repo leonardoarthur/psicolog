@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import '../widgets/entry_form.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class TherapyHistoryScreen extends StatelessWidget {
   const TherapyHistoryScreen({super.key});
@@ -32,7 +33,7 @@ class TherapyHistoryScreen extends StatelessWidget {
                       .toList();
 
                   if (entries.isEmpty) {
-                    return const Center(
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -42,7 +43,7 @@ class TherapyHistoryScreen extends StatelessWidget {
                             color: Colors.teal,
                           ),
                           SizedBox(height: 16),
-                          Text('Nenhuma sessão registrada.'),
+                          Text(AppLocalizations.of(context)!.noTherapyRecorded),
                         ],
                       ),
                     );
@@ -73,7 +74,7 @@ class TherapyHistoryScreen extends StatelessWidget {
             ),
           );
         },
-        label: const Text('Nova Sessão'),
+        label: Text(AppLocalizations.of(context)!.newSession),
         icon: const Icon(Icons.add),
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
@@ -215,6 +216,7 @@ class _TherapyCard extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (ctx) {
+        final l10n = AppLocalizations.of(context)!;
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -224,7 +226,7 @@ class _TherapyCard extends StatelessWidget {
                   entry.isPinned ? Icons.push_pin_outlined : Icons.push_pin,
                   color: Colors.teal,
                 ),
-                title: Text(entry.isPinned ? 'Desafixar' : 'Fixar'),
+                title: Text(entry.isPinned ? l10n.unpin : l10n.pin),
                 onTap: () {
                   Navigator.pop(ctx);
                   context.read<JournalProvider>().togglePin(entry);
@@ -232,7 +234,7 @@ class _TherapyCard extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.edit, color: Colors.blue),
-                title: const Text('Editar'),
+                title: Text(l10n.edit),
                 onTap: () {
                   Navigator.pop(ctx);
                   _showEntryFormWithEntry(context, entry);
@@ -240,9 +242,9 @@ class _TherapyCard extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text(
-                  'Excluir',
-                  style: TextStyle(color: Colors.red),
+                title: Text(
+                  l10n.delete,
+                  style: const TextStyle(color: Colors.red),
                 ),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -270,22 +272,23 @@ class _TherapyCard extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Excluir sessão?'),
-        content: const Text('Essa ação não pode ser desfeita.'),
+        title: Text(l10n.deleteSessionTitle),
+        content: Text(l10n.deleteEntryContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('CANCELAR'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx); // Close dialog
               context.read<JournalProvider>().deleteEntry(entry.id);
             },
-            child: const Text('EXCLUIR', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

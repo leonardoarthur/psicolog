@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../logic/providers/echoes_provider.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class EchoesScreen extends StatelessWidget {
   const EchoesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Ecos')),
+      appBar: AppBar(title: Text(l10n.navEchoes)),
       body: Consumer<EchoesProvider>(
         builder: (context, provider, child) {
           final topWords = provider.topWords;
 
           if (topWords.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
                 padding: EdgeInsets.all(32.0),
-                child: Text(
-                  'Escreva mais no seu diário para ver os significantes aparecerem aqui.',
-                  textAlign: TextAlign.center,
-                ),
+                child: Text(l10n.echoesEmpty, textAlign: TextAlign.center),
               ),
             );
           }

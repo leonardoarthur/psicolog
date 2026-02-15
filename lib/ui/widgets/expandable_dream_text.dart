@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:psicolog/l10n/app_localizations.dart';
 
 class ExpandableDreamText extends StatefulWidget {
   final String text;
@@ -37,7 +38,9 @@ class _ExpandableDreamTextState extends State<ExpandableDreamText> {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(
-                _isExpanded ? 'Ver menos' : 'Ver mais',
+                _isExpanded
+                    ? AppLocalizations.of(context)!.seeLess
+                    : AppLocalizations.of(context)!.seeMore,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,

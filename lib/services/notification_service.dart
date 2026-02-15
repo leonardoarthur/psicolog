@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:math';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -27,7 +28,7 @@ class NotificationService {
     }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@mipmap/launcher_icon');
 
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
@@ -53,7 +54,17 @@ class NotificationService {
     }
   }
 
-  Future<void> scheduleWeeklyTherapyNotification({
+  static const List<String> _therapyMessages = [
+    'Como foi a sessão hoje? Escreva para não esquecer.',
+    'Terapia finalizada. Que tal registrar seus insights?',
+    'O que você aprendeu sobre si mesmo hoje?',
+    'Tire um momento para refletir sobre sua sessão.',
+    'Registrar seus sentimentos agora ajuda a processá-los melhor.',
+    'Algum insight importante? Anote agora!',
+    'Como você está se sentindo após a terapia?',
+  ];
+
+  Future<String> scheduleWeeklyTherapyNotification({
     required int dayOfWeek, // 1 = Monday, 7 = Sunday
     required int hour,
     required int minute,
@@ -61,30 +72,38 @@ class NotificationService {
     // ID 1 for Therapy
     await flutterLocalNotificationsPlugin.cancel(id: 1);
 
-    final scheduledDate = _nextInstanceOfDayTime(dayOfWeek, hour, minute);
+    final random = Random();
+    final message = _therapyMessages[random.nextInt(_therapyMessages.length)];
+
+    final scheduledDate = _nextInstanceOfTherapy(dayOfWeek, hour, minute);
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id: 1,
       title: 'Como foi a terapia?',
-      body: 'Registre seus insights enquanto estão frescos.',
+      body: message,
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          'therapy_channel_v2', // Changed ID to force update
-          'Lembretes de Terapia (Atualizado)',
+          'therapy_channel_v2',
+          'Lembretes de Terapia',
           channelDescription: 'Notificações para registrar sessão de terapia',
-          importance: Importance.max, // Escalate to Max
+          importance: Importance.max,
           priority: Priority.high,
-          fullScreenIntent: true, // Try to be very aggressive for visibility
+          fullScreenIntent: true,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
+
+    return '${scheduledDate.day}/${scheduledDate.month} às ${scheduledDate.hour}:${scheduledDate.minute.toString().padLeft(2, '0')}';
   }
 
-  tz.TZDateTime _nextInstanceOfDayTime(int dayOfWeek, int hour, int minute) {
+  tz.TZDateTime _nextInstanceOfTherapy(int dayOfWeek, int hour, int minute) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+
+    // Start with the target time for THIS week (or today)
+    // We construct the date using "now" year/month/day but target time
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
@@ -94,20 +113,65 @@ class NotificationService {
       minute,
     );
 
+    // Initial Adjustment: Find the correct Day of Week
+    // We want the scheduledDate to be on 'dayOfWeek'.
+    // Note: This naive while loop moves forward.
+    // Ideally we should find the closest day match.
+    // If today is Friday (5) and we want Monday (1).
+    // Loop adds days until weekday is 1.
     while (scheduledDate.weekday != dayOfWeek) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
 
-    // If today is the day but time has passed, add 7 days (actually the loop above might handle it?
-    // No, loop just finds NEXT day of week. If today match, we check time.)
+    // Apply the 30-minute delay
+    // This is crucial: we apply delay BEFORE checking if it's in the past.
+    // This allows "catching" a session that just finished 5 mins ago.
+    scheduledDate = scheduledDate.add(const Duration(minutes: 30));
 
+    // Now check if this calculated time is in the past
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 7));
     }
+
     return scheduledDate;
   }
 
   Future<void> cancelTherapyNotification() async {
     await flutterLocalNotificationsPlugin.cancel(id: 1);
+  }
+
+  Future<void> showTestNotification() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'test_channel',
+          'Canal de Teste',
+          channelDescription: 'Canal para testar notificações',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
+
+    final random = Random();
+    final message = _therapyMessages[random.nextInt(_therapyMessages.length)];
+
+    await flutterLocalNotificationsPlugin.show(
+      id: 999,
+      title: 'Teste de Notificação',
+      body: message,
+      notificationDetails: platformChannelSpecifics,
+    );
+  }
+
+  Future<List<PendingNotificationRequest>> checkPendingNotifications() async {
+    final pending = await flutterLocalNotificationsPlugin
+        .pendingNotificationRequests();
+    for (var p in pending) {
+      print(
+        'Pending notification: id=${p.id}, title=${p.title}, body=${p.body}, payload=${p.payload}',
+      );
+    }
+    return pending;
   }
 }

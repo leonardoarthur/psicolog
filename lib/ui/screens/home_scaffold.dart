@@ -7,6 +7,8 @@ import 'echoes_screen.dart';
 
 import '../widgets/background_wrapper.dart';
 
+import 'package:psicolog/l10n/app_localizations.dart';
+
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
 
@@ -26,6 +28,7 @@ class _MainScaffoldState extends State<MainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: BackgroundWrapper(child: _screens[_selectedIndex]),
@@ -36,26 +39,26 @@ class _MainScaffoldState extends State<MainScaffold> {
             _selectedIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.nights_stay_outlined),
-            selectedIcon: Icon(Icons.nights_stay),
-            label: 'Sonhos',
+            icon: const Icon(Icons.nights_stay_outlined),
+            selectedIcon: const Icon(Icons.nights_stay),
+            label: l10n.navDreams,
           ),
           NavigationDestination(
-            icon: Icon(Icons.book_outlined),
-            selectedIcon: Icon(Icons.book),
-            label: 'Diário',
+            icon: const Icon(Icons.book_outlined),
+            selectedIcon: const Icon(Icons.book),
+            label: l10n.navJournal,
           ),
           NavigationDestination(
-            icon: Icon(Icons.self_improvement_outlined),
-            selectedIcon: Icon(Icons.self_improvement),
-            label: 'Terapia',
+            icon: const Icon(Icons.self_improvement_outlined),
+            selectedIcon: const Icon(Icons.self_improvement),
+            label: l10n.navTherapy,
           ),
           NavigationDestination(
-            icon: Icon(Icons.graphic_eq),
-            selectedIcon: Icon(Icons.graphic_eq),
-            label: 'Ecos',
+            icon: const Icon(Icons.graphic_eq),
+            selectedIcon: const Icon(Icons.graphic_eq),
+            label: l10n.navEchoes,
           ),
         ],
       ),
