@@ -20,11 +20,13 @@ class JournalProvider extends ChangeNotifier {
   void _init() {
     _databaseService.watchEntries().listen((entries) {
       _entries = entries;
+      _updateHeatmap();
       notifyListeners();
     });
 
     _databaseService.watchAllDailyMoods().listen((moods) {
       _allDailyMoods = moods;
+      _updateHeatmap();
       notifyListeners();
     });
 
@@ -78,9 +80,17 @@ class JournalProvider extends ChangeNotifier {
     await _databaseService.saveDailyMood(mood);
   }
 
-  Map<DateTime, int> getEmotionalHeatmap() {
-    final Map<DateTime, List<Entry>> entriesByDate = {};
+  Map<DateTime, int> _cachedHeatmap = {};
 
+  Map<DateTime, int> getEmotionalHeatmap() {
+    // Return cached if available and valid
+    // We invalidate cache on notifyListeners? No, we need to invalidate when data changes.
+    // simpler: compute and cache inside the listener, just like EchoesProvider
+    return _cachedHeatmap;
+  }
+
+  void _updateHeatmap() {
+    final Map<DateTime, List<Entry>> entriesByDate = {};
     for (var entry in _entries) {
       final date = DateTime(
         entry.timestamp.year,
@@ -105,7 +115,6 @@ class JournalProvider extends ChangeNotifier {
       final dayEntries = entriesByDate[date] ?? [];
 
       bool hasDream = dayEntries.any((e) => e.type == EntryType.dream);
-      // Check legacy mood in entries OR new DailyMood model
       bool hasMood =
           dayEntries.any((e) => e.dailyMood != null) ||
           _allDailyMoods.any(
@@ -129,7 +138,6 @@ class JournalProvider extends ChangeNotifier {
 
       heatmap[date] = level;
     }
-
-    return heatmap;
+    _cachedHeatmap = heatmap;
   }
 }

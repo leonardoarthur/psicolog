@@ -5,6 +5,7 @@ import '../../logic/providers/journal_provider.dart';
 import '../../data/models/entry.dart';
 import '../widgets/entry_form.dart';
 import 'package:psicolog/l10n/app_localizations.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class TherapyHistoryScreen extends StatelessWidget {
   const TherapyHistoryScreen({super.key});
@@ -14,52 +15,79 @@ class TherapyHistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                'Minha Terapia',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Consumer<JournalProvider>(
-                builder: (context, provider, child) {
-                  final entries = provider.entries
-                      .where((e) => e.type == EntryType.therapy)
-                      .toList();
+        child: Consumer<JournalProvider>(
+          builder: (context, provider, child) {
+            final entries = provider.entries
+                .where((e) => e.type == EntryType.therapy)
+                .toList();
 
-                  if (entries.isEmpty) {
-                    return Center(
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  floating: true,
+                  pinned: false,
+                  snap: true,
+                  expandedHeight: 100,
+                  flexibleSpace: FlexibleSpaceBar(
+                    titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+                    title: Text(
+                      'Minha Terapia',
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                    ),
+                  ),
+                ),
+                if (entries.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.self_improvement,
-                            size: 64,
-                            color: Colors.teal,
-                          ),
-                          SizedBox(height: 16),
+                          const Icon(
+                                Icons.self_improvement,
+                                size: 64,
+                                color: Colors.teal,
+                              )
+                              .animate(onPlay: (c) => c.repeat(reverse: true))
+                              .scale(
+                                begin: const Offset(1, 1),
+                                end: const Offset(1.1, 1.1),
+                                duration: 2000.ms,
+                              ),
+                          const SizedBox(height: 16),
                           Text(AppLocalizations.of(context)!.noTherapyRecorded),
                         ],
-                      ),
-                    );
-                  }
-                  return ListView.builder(
+                      ).animate().fadeIn(duration: 600.ms),
+                    ),
+                  )
+                else
+                  SliverPadding(
                     padding: const EdgeInsets.all(16),
-                    itemCount: entries.length,
-                    itemBuilder: (context, index) {
-                      final entry = entries[index];
-                      return _TherapyCard(entry: entry);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final entry = entries[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _TherapyCard(entry: entry)
+                              .animate()
+                              .fadeIn(duration: 500.ms, delay: (50 * index).ms)
+                              .slideX(
+                                begin: -0.1,
+                                end: 0,
+                                curve: Curves.easeOutQuad,
+                              ),
+                        );
+                      }, childCount: entries.length),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(

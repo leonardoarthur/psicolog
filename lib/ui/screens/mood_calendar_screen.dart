@@ -8,6 +8,8 @@ import '../../logic/providers/journal_provider.dart';
 import '../widgets/daily_check_in.dart';
 import 'package:psicolog/l10n/app_localizations.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 class MoodCalendarScreen extends StatefulWidget {
   const MoodCalendarScreen({super.key});
 
@@ -32,7 +34,7 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
 
           return Column(
             children: [
-              const DailyMoodSelector(),
+              const DailyMoodSelector().animate().fadeIn(duration: 400.ms),
               HeatMapCalendar(
                 datasets: heatmapData,
                 colorMode: ColorMode.color,
@@ -51,7 +53,7 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
                     _selectedDate = value;
                   });
                 },
-              ),
+              ).animate().fadeIn(duration: 600.ms, delay: 200.ms),
               const Divider(),
               Expanded(child: _buildDayList(provider, _selectedDate)),
             ],
@@ -71,15 +73,32 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
 
     if (dayEntries.isEmpty) {
       return Center(
-        child: Text(
-          AppLocalizations.of(context)!.noRecordsOn(
-            DateFormat(
-              'dd/MM',
-              Localizations.localeOf(context).toString(),
-            ).format(date),
-          ),
-          style: const TextStyle(color: Colors.grey),
-        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+                  Icons.event_note,
+                  size: 48,
+                  color: Colors.grey.withValues(alpha: 0.5),
+                )
+                .animate(onPlay: (c) => c.repeat(reverse: true))
+                .scale(
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.1, 1.1),
+                  duration: 2000.ms,
+                ),
+            const SizedBox(height: 8),
+            Text(
+              AppLocalizations.of(context)!.noRecordsOn(
+                DateFormat(
+                  'dd/MM',
+                  Localizations.localeOf(context).toString(),
+                ).format(date),
+              ),
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ).animate().fadeIn(duration: 400.ms),
       );
     }
 
@@ -89,18 +108,23 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
       itemBuilder: (context, index) {
         final entry = dayEntries[index];
         return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: _getIconForType(entry.type),
-            title: Text(entry.title ?? AppLocalizations.of(context)!.untitled),
-            subtitle: Text(
-              entry.content,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: Text(DateFormat('HH:mm').format(entry.timestamp)),
-          ),
-        );
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: _getIconForType(entry.type),
+                title: Text(
+                  entry.title ?? AppLocalizations.of(context)!.untitled,
+                ),
+                subtitle: Text(
+                  entry.content,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Text(DateFormat('HH:mm').format(entry.timestamp)),
+              ),
+            )
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (50 * index).ms)
+            .slideX(begin: 0.1, end: 0);
       },
     );
   }

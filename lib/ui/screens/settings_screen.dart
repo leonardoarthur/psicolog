@@ -185,7 +185,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     // Request permissions first (UX improvement)
+    // Request permissions first (UX improvement)
     await NotificationService().requestPermissions();
+
+    // Check specifically for Exact Alarm permission (crucial for Android 12+ on Xiaomi)
+    final hasExactAlarmPermission = await NotificationService()
+        .checkExactAlarmPermission();
+    if (!hasExactAlarmPermission && mounted) {
+      final bool? openSettings = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Permissão Necessária'),
+          content: const Text(
+            'Para garantir que a notificação funcione no horário exato, é necessário permitir "Alarmes e lembretes" nas configurações.\n\nDispositivos Xiaomi/Samsung frequentemente bloqueiam isso para economizar bateria.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Abrir Configurações'),
+            ),
+          ],
+        ),
+      );
+
+      if (openSettings == true) {
+        await NotificationService().openAlarmSettings();
+      }
+    }
 
     // Schedule
     final scheduledInfo = await NotificationService()

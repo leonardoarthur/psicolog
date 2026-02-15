@@ -1,8 +1,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -20,12 +23,16 @@ class NotificationService {
       final String timeZoneName = localTimezoneParams.toString();
       tz.setLocalLocation(tz.getLocation(timeZoneName));
     } catch (e) {
+      debugPrint('Error getting local timezone: $e');
       try {
         tz.setLocalLocation(tz.getLocation('America/Sao_Paulo'));
+        debugPrint('Fallback to America/Sao_Paulo');
       } catch (_) {
+        debugPrint('Fallback to UTC');
         // Default to UTC
       }
     }
+    debugPrint('Timezone initialized: ${tz.local.name}');
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/launcher_icon');
@@ -50,8 +57,22 @@ class NotificationService {
     if (androidImplementation != null) {
       await androidImplementation.requestNotificationsPermission();
       // Explicitly request exact alarms permission for Android 12+ (API 31+)
-      await androidImplementation.requestExactAlarmsPermission();
+      final exactAlarmResult = await androidImplementation
+          .requestExactAlarmsPermission();
+      debugPrint('Exact alarm permission requested. Result: $exactAlarmResult');
+
+      final canSchedule = await androidImplementation
+          .canScheduleExactNotifications();
+      debugPrint('Can schedule exact notifications: $canSchedule');
     }
+  }
+
+  Future<bool> checkExactAlarmPermission() async {
+    return await Permission.scheduleExactAlarm.isGranted;
+  }
+
+  Future<void> openAlarmSettings() async {
+    await openAppSettings();
   }
 
   static const List<String> _therapyMessages = [
@@ -84,17 +105,20 @@ class NotificationService {
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
-          'therapy_channel_v2',
+          'therapy_channel_v3',
           'Lembretes de Terapia',
           channelDescription: 'Notificações para registrar sessão de terapia',
           importance: Importance.max,
           priority: Priority.high,
-          fullScreenIntent: true,
+          fullScreenIntent: false,
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.alarmClock,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
     );
+
+    debugPrint('Scheduled therapy notification for: $scheduledDate (Local)');
+    debugPrint('Now is: ${tz.TZDateTime.now(tz.local)} (Local)');
 
     return '${scheduledDate.day}/${scheduledDate.month} às ${scheduledDate.hour}:${scheduledDate.minute.toString().padLeft(2, '0')}';
   }
@@ -168,7 +192,7 @@ class NotificationService {
     final pending = await flutterLocalNotificationsPlugin
         .pendingNotificationRequests();
     for (var p in pending) {
-      print(
+      debugPrint(
         'Pending notification: id=${p.id}, title=${p.title}, body=${p.body}, payload=${p.payload}',
       );
     }

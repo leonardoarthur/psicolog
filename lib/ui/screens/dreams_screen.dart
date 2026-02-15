@@ -8,6 +8,8 @@ import '../widgets/entry_form.dart';
 import '../widgets/expandable_dream_text.dart';
 import 'package:psicolog/l10n/app_localizations.dart';
 
+import 'package:flutter_animate/flutter_animate.dart';
+
 class DreamsScreen extends StatelessWidget {
   const DreamsScreen({super.key});
 
@@ -23,101 +25,144 @@ class DreamsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FutureBuilder<AppSettings>(
-                    future: context
-                        .read<JournalProvider>()
-                        .databaseService
-                        .getAppSettings(), // Access cached usage or just fetch
-                    builder: (context, snapshot) {
-                      final name = snapshot.data?.userName ?? l10n.visitor;
-                      return Text(
-                        '$greeting, $name',
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.dreamPrompt,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EntryFormWidget(
-                            type: EntryType.dream,
-                            scrollController: ScrollController(),
-                          ),
-                        ),
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    icon: const Icon(Icons.nights_stay),
-                    label: Text(l10n.recordDreamNow),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
-            Expanded(
-              child: Consumer<JournalProvider>(
-                builder: (context, provider, child) {
-                  // Filter only dreams
-                  final dreams = provider.entries
-                      .where((e) => e.type == EntryType.dream)
-                      .toList();
+        child: Consumer<JournalProvider>(
+          builder: (context, provider, child) {
+            // Filter only dreams
+            final dreams = provider.entries
+                .where((e) => e.type == EntryType.dream)
+                .toList();
 
-                  if (dreams.isEmpty) {
-                    return Center(
+            return CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  floating: true,
+                  pinned: false,
+                  snap: true,
+                  expandedHeight: 140,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0,
+                        vertical: 16.0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          FutureBuilder<AppSettings>(
+                            future: provider.databaseService.getAppSettings(),
+                            builder: (context, snapshot) {
+                              final name =
+                                  snapshot.data?.userName ?? l10n.visitor;
+                              return Text(
+                                '$greeting, $name',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            l10n.dreamPrompt,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 8.0,
+                    ),
+                    child:
+                        FilledButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EntryFormWidget(
+                                  type: EntryType.dream,
+                                  scrollController: ScrollController(),
+                                ),
+                              ),
+                            );
+                          },
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.all(16),
+                          ),
+                          icon: const Icon(Icons.nights_stay),
+                          label: Text(l10n.recordDreamNow),
+                        ).animate().scale(
+                          duration: 300.ms,
+                          curve: Curves.easeOutBack,
+                        ),
+                  ),
+                ),
+                if (dreams.isEmpty)
+                  SliverFillRemaining(
+                    child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.cloud_off,
-                            size: 64,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                          ),
+                                Icons.cloud_off,
+                                size: 64,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                              )
+                              .animate(onPlay: (c) => c.repeat(reverse: true))
+                              .scale(
+                                begin: const Offset(1, 1),
+                                end: const Offset(1.1, 1.1),
+                                duration: 2000.ms,
+                              ),
                           const SizedBox(height: 16),
                           Text(l10n.noDreamsYet),
                         ],
-                      ),
-                    );
-                  }
-
-                  return ListView.separated(
+                      ).animate().fadeIn(duration: 600.ms),
+                    ),
+                  )
+                else
+                  SliverPadding(
                     padding: const EdgeInsets.all(16),
-                    itemCount: dreams.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final dream = dreams[index];
-                      return _DreamTimelineItem(dream: dream);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final dream = dreams[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _DreamTimelineItem(dream: dream)
+                              .animate()
+                              .fadeIn(duration: 500.ms, delay: (50 * index).ms)
+                              .slideX(
+                                begin: 0.1,
+                                end: 0,
+                                curve: Curves.easeOutQuad,
+                              ),
+                        );
+                      }, childCount: dreams.length),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );

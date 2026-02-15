@@ -28,6 +28,10 @@ class AppTheme {
       brightness: Brightness.dark,
       primary: Color(0xFFD1C4E9), // Soft Violet (High contrast on dark)
       onPrimary: Color(0xFF311B92),
+      primaryContainer: Color(0xFF4527A0), // Deep Purple for containers
+      onPrimaryContainer: Color(
+        0xFFEDE7F6,
+      ), // Light Purple for content on containers
       secondary: Color(0xFF80DEEA), // Soft Teal (Healing/Calm)
       onSecondary: Color(0xFF006064),
       tertiary: Color(0xFFFFCC80), // Glowing Amber (Warmth/Insight)
@@ -37,6 +41,9 @@ class AppTheme {
       surface: Color(0xFF1E1E2C), // Dark Gunmetal/Navy
       onSurface: Color(0xFFE2E8F0),
       surfaceContainerHighest: Color(0xFF2D2D44), // Slightly lighter for cards
+      onSurfaceVariant: Color(
+        0xFFBDBDBD,
+      ), // Lighter grey for secondary text on dark
     ),
     scaffoldBackgroundColor: const Color(0xFF0F0F1A), // Deepest Void
     textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),

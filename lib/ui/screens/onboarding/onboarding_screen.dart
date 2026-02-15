@@ -113,7 +113,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   shape: BoxShape.circle,
                   color: _currentPage == index
                       ? Theme.of(context).colorScheme.primary
-                      : Colors.grey.withValues(alpha: 0.3),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.2),
                 ),
               );
             }),
@@ -124,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               onPressed: _completeOnboarding,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
               ),
               child: const Text('Começar'),
             )
@@ -160,9 +162,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 16),
           Text(
             'Seu espaço seguro para autoconhecimento, registro de emoções e acompanhamento terapêutico.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -185,6 +187,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             const SizedBox(height: 32),
             TextField(
               controller: _nameController,
+              textCapitalization: TextCapitalization.words,
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
                 hintText: 'Seu nome ou apelido',
@@ -237,7 +240,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                     child: Icon(
                       feature.$1,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       size: 24,
                     ),
                   ),
@@ -256,7 +259,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Text(
                           feature.$3,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontSize: 14,
                           ),
                         ),
@@ -292,9 +297,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 16),
           Text(
             'Sinta-se à vontade para explorar. Lembre-se, este é o seu momento.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             textAlign: TextAlign.center,
           ),
         ],
