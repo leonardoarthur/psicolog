@@ -133,5 +133,9 @@
   "associationsHint": "What happened yesterday that might have triggered this?",
   
   "seeMore": "See more",
-  "seeLess": "See less"
+  "seeLess": "See less",
+
+  
+  "supportMe": "Support the Project",
+  "supportMeSubtitle": "Buy me a coffee on Ko-fi"
 }

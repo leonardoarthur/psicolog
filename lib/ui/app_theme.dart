@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static final ThemeData lightTheme = ThemeData(
@@ -13,7 +12,8 @@ class AppTheme {
       onSurface: const Color(0xFF1F2937),
     ),
     scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-    textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
+    fontFamily: 'Outfit',
+    // textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 0,
@@ -46,7 +46,8 @@ class AppTheme {
       ), // Lighter grey for secondary text on dark
     ),
     scaffoldBackgroundColor: const Color(0xFF0F0F1A), // Deepest Void
-    textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
+    fontFamily: 'Outfit',
+    // textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
     appBarTheme: const AppBarTheme(
       centerTitle: true,
       elevation: 0,

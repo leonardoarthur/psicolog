@@ -361,4 +361,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get seeLess => 'Ver menos';
+
+  @override
+  String get supportMe => 'Apoya el Proyecto';
+
+  @override
+  String get supportMeSubtitle => 'Cómprame un café en Ko-fi';
 }

@@ -362,4 +362,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get seeLess => 'See less';
+
+  @override
+  String get supportMe => 'Support the Project';
+
+  @override
+  String get supportMeSubtitle => 'Buy me a coffee on Ko-fi';
 }

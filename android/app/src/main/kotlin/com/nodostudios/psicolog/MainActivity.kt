@@ -1,4 +1,4 @@
-package com.example.psicolog
+package com.nodostudios.psicolog
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

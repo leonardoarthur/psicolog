@@ -783,6 +783,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Ver menos'**
   String get seeLess;
+
+  /// No description provided for @supportMe.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apoie o Projeto'**
+  String get supportMe;
+
+  /// No description provided for @supportMeSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pague um café no Ko-fi'**
+  String get supportMeSubtitle;
 }
 
 class _AppLocalizationsDelegate

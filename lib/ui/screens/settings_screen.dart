@@ -6,6 +6,7 @@ import '../../services/notification_service.dart';
 import '../../logic/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:psicolog/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   final DatabaseService databaseService;
@@ -185,7 +186,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     // Request permissions first (UX improvement)
-    // Request permissions first (UX improvement)
     await NotificationService().requestPermissions();
 
     // Check specifically for Exact Alarm permission (crucial for Android 12+ on Xiaomi)
@@ -247,6 +247,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await NotificationService().cancelTherapyNotification();
   }
 
+  Future<void> _launchKofi() async {
+    final Uri url = Uri.parse('https://ko-fi.com/nodostudios');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not launch Ko-fi')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -291,6 +302,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: Text(l10n.restoreDataSubtitle),
                   onTap: _restoreData,
                 ),
+                const Divider(),
+                // Ko-fi Section
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: InkWell(
+                      onTap: _launchKofi,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey[900]
+                              : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Image.asset(
+                              'assets/images/support_me_on_kofi_red.png',
+                              height: 40,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.coffee,
+                                  color: Colors.brown,
+                                  size: 40,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.supportMe,
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              l10n.supportMeSubtitle,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
               ],
             ),
     );
@@ -338,43 +399,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )
               : const Icon(Icons.chevron_right),
           onTap: _updateTherapySchedule,
-        ),
-        ListTile(
-          title: Text(l10n.testNotification),
-          subtitle: Text(l10n.testNotificationSubtitle),
-          leading: const Icon(Icons.notifications_active),
-          onTap: () async {
-            await NotificationService().showTestNotification();
-            if (mounted) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(l10n.notificationSent)));
-            }
-          },
-        ),
-        ListTile(
-          title: Text(l10n.checkSchedule),
-          subtitle: Text(l10n.checkScheduleSubtitle),
-          leading: const Icon(Icons.playlist_add_check),
-          onTap: () async {
-            // Re-request permissions just in case
-            await NotificationService().requestPermissions();
-
-            final pending = await NotificationService()
-                .checkPendingNotifications();
-            if (mounted) {
-              if (pending.isEmpty) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(l10n.noScheduleFound)));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.schedulesFound(pending.length))),
-                );
-                // Also print to console for debugging if needed, but snackbar sufficient for user count
-              }
-            }
-          },
         ),
       ],
     );
