@@ -795,6 +795,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pague um café no Ko-fi'**
   String get supportMeSubtitle;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Política de Privacidade'**
+  String get privacyPolicy;
 }
 
 class _AppLocalizationsDelegate

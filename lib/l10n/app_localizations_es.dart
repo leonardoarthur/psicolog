@@ -367,4 +367,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get supportMeSubtitle => 'Cómprame un café en Ko-fi';
+
+  @override
+  String get privacyPolicy => 'Política de Privacidad';
 }

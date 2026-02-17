@@ -258,6 +258,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _launchPrivacyPolicy() async {
+    final Uri url = Uri.parse(
+      'https://leonardoarthur.github.io/psicolog-privacy/',
+    );
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch Privacy Policy')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -347,6 +360,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Center(
+                  child: TextButton(
+                    onPressed: _launchPrivacyPolicy,
+                    child: Text(
+                      l10n.privacyPolicy,
+                      style: const TextStyle(
+                        decoration: TextDecoration.underline,
+                        color: Colors.grey,
                       ),
                     ),
                   ),

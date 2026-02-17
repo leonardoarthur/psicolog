@@ -368,4 +368,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportMeSubtitle => 'Buy me a coffee on Ko-fi';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
 }
